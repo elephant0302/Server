@@ -79,7 +79,7 @@ jobs:
             docker stop capstone-api
             docker rm capstone-api
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
-            docker run -d -p 8080:8080 --name capstone-api ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
+            docker run -d -p 9000:9000 --name capstone-api ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
 
       - name: Remove Github Actions IP from security group
         if: always()
