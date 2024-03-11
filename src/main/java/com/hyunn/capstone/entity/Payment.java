@@ -33,6 +33,10 @@ public class Payment extends BaseEntity {
   @Column(name = "address")
   private String address;
 
+  // 배송 회사 링크
+  @Column(name = "link")
+  private String link;
+
   // 조인
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
