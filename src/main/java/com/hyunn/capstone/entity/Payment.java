@@ -33,19 +33,22 @@ public class Payment extends BaseEntity {
   @Column(name = "address")
   private String address;
 
+  // 배송 회사 링크
+  @Column(name = "link")
+  private String link;
+
   // 조인
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Payment(Long paymentId, Integer price, String address) {
-    this.paymentId = paymentId;
+  private Payment(Integer price, String address) {
     this.price = price;
     this.address = address;
   }
 
-  public static Payment createPayment(Long paymentId, Integer price, String address) {
-    return new Payment(paymentId, price, address);
+  public static Payment createPayment(Integer price, String address) {
+    return new Payment(price, address);
   }
 
 }

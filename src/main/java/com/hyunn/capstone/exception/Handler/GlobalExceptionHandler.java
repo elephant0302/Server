@@ -1,10 +1,9 @@
 package com.hyunn.capstone.exception.Handler;
 
-import com.hyunn.capstone.dto.ApiStandardResponse;
-import com.hyunn.capstone.dto.ErrorResponse;
+import com.hyunn.capstone.dto.Response.ApiStandardResponse;
+import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ErrorStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

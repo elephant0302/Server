@@ -33,24 +33,33 @@ public class Image extends BaseEntity {
   @Column(name = "three_dimension")
   private String threeDimension;
 
-  // 키워드
+  // 키워드 (동물)
   @Column(name = "key_word")
   private String keyWord;
+
+  // 감정
+  @Column(name = "emotion")
+  private String emotion;
+
+  // 키워드
+  @Column(name = "gender")
+  private Boolean gender;
 
   // 조인
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Image(Long imageId, String image, String threeDimension, String keyWord) {
-    this.imageId = imageId;
+  private Image(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
     this.image = image;
     this.threeDimension = threeDimension;
     this.keyWord = keyWord;
+    this.emotion = emotion;
+    this.gender = gender;
   }
 
-  public static Image createImage(Long imageId, String image, String threeDimension, String keyWord) {
-    return new Image(imageId, image, threeDimension, keyWord);
+  public static Image createImage(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
+    return new Image(image, threeDimension, keyWord, emotion, gender);
   }
 
 }

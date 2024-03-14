@@ -1,4 +1,4 @@
-package com.hyunn.capstone.dto;
+package com.hyunn.capstone.dto.Response;
 
 import com.hyunn.capstone.exception.ErrorStatus;
 import lombok.Getter;
