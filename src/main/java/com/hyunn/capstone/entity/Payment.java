@@ -42,14 +42,13 @@ public class Payment extends BaseEntity {
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Payment(Long paymentId, Integer price, String address) {
-    this.paymentId = paymentId;
+  private Payment(Integer price, String address) {
     this.price = price;
     this.address = address;
   }
 
-  public static Payment createPayment(Long paymentId, Integer price, String address) {
-    return new Payment(paymentId, price, address);
+  public static Payment createPayment(Integer price, String address) {
+    return new Payment(price, address);
   }
 
 }

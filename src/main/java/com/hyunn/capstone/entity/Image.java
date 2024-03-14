@@ -50,8 +50,7 @@ public class Image extends BaseEntity {
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Image(Long imageId, String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
-    this.imageId = imageId;
+  private Image(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
     this.image = image;
     this.threeDimension = threeDimension;
     this.keyWord = keyWord;
@@ -59,8 +58,8 @@ public class Image extends BaseEntity {
     this.gender = gender;
   }
 
-  public static Image createImage(Long imageId, String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
-    return new Image(imageId, image, threeDimension, keyWord, emotion, gender);
+  public static Image createImage(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
+    return new Image(image, threeDimension, keyWord, emotion, gender);
   }
 
 }

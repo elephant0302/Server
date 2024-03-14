@@ -30,14 +30,13 @@ public class User extends BaseEntity {
   @Column(name = "password")
   private String password;
 
-  private User(Long userId, String phone, String password) {
-    this.userId = userId;
+  private User(String phone, String password) {
     this.phone = phone;
     this.password = password;
   }
 
-  public static User createUser(Long userId, String phone, String password) {
-    return new User(userId, phone, password);
+  public static User createUser(String phone, String password) {
+    return new User(phone, password);
   }
 
 }
