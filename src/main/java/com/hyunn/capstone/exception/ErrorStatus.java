@@ -15,7 +15,8 @@ public enum ErrorStatus {
   DATABASE_ERROR("06"),
   INTERNAL_SERVER_ERROR("07"),
   VALIDATION_EXCEPTION("08"),
-  INVALID_JSON("09");
+  INVALID_JSON_EXCEPTION("09"),
+  API_NOT_FOUND_EXCEPTION("10");
 
   private final String code;
 
