@@ -12,20 +12,18 @@ public class ImageRequest {
   private String image;
 
   @NotBlank(message = "성별을 입력해주세요.")
-  @Min(value = 0, message = "남자는 0, 여자는 1로 입력해주세요.")
-  @Max(value = 1, message = "남자는 0, 여자는 1로 입력해주세요.")
-  private Boolean gender;
+  private String gender;
 
   @NotBlank(message = "감정을 입력해주세요.")
   private String emotion;
 
-  public ImageRequest(String image, Boolean gender, String emotion) {
+  public ImageRequest(String image, String gender, String emotion) {
     this.image = image;
     this.gender = gender;
     this.emotion = emotion;
   }
 
-  public static ImageRequest create(String image, Boolean gender, String emotion) {
+  public static ImageRequest create(String image, String gender, String emotion) {
     return new ImageRequest(image, gender, emotion);
   }
 }
