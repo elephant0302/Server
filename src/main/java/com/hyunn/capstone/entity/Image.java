@@ -41,16 +41,16 @@ public class Image extends BaseEntity {
   @Column(name = "emotion")
   private String emotion;
 
-  // 키워드
+  // 성별
   @Column(name = "gender")
-  private Boolean gender;
+  private String gender;
 
   // 조인
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Image(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
+  private Image(String image, String threeDimension, String keyWord, String emotion, String gender) {
     this.image = image;
     this.threeDimension = threeDimension;
     this.keyWord = keyWord;
@@ -58,7 +58,7 @@ public class Image extends BaseEntity {
     this.gender = gender;
   }
 
-  public static Image createImage(String image, String threeDimension, String keyWord, String emotion, Boolean gender) {
+  public static Image createImage(String image, String threeDimension, String keyWord, String emotion, String gender) {
     return new Image(image, threeDimension, keyWord, emotion, gender);
   }
 

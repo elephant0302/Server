@@ -114,7 +114,7 @@ public class UserExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiStandardResponse<ErrorResponse> handleHttpMessageNotReadableException(
       HttpMessageNotReadableException e) {
-    ErrorResponse errorResponse = ErrorResponse.create(INVALID_JSON,
+    ErrorResponse errorResponse = ErrorResponse.create(INVALID_JSON_EXCEPTION,
         "올바르지 않은 JSON 형식입니다.");
     return ApiStandardResponse.fail(errorResponse);
   }

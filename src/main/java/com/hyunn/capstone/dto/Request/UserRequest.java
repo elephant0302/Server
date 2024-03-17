@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
-public class UserDeleteRequest {
+public class UserRequest {
   @NotBlank(message = "핸드폰 번호를 입력해주세요.")
   @Pattern(regexp = "^\\d{11}$", message = "핸드폰 번호는 11자리여야 합니다.")
   private String phone;
@@ -16,12 +16,12 @@ public class UserDeleteRequest {
   private String password;
 
 
-  public UserDeleteRequest(String phone, String password) {
+  public UserRequest(String phone, String password) {
     this.phone = phone;
     this.password = password;
   }
 
-  public static UserDeleteRequest create (String phone, String password) {
-    return new UserDeleteRequest(phone, password);
+  public static UserRequest create (String phone, String password) {
+    return new UserRequest(phone, password);
   }
 }
