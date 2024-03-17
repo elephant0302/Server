@@ -8,14 +8,14 @@ public class ImageResponse {
 
   private String threeDimension;
 
-  private String keyWord;
+  private String prompt;
 
-  public ImageResponse(String threeDimension, String keyWord) {
+  public ImageResponse(String threeDimension, String prompt) {
     this.threeDimension = threeDimension;
-    this.keyWord = keyWord;
+    this.prompt = prompt;
   }
 
-  public static ImageResponse create(String threeDimension, String keyWord) {
-    return new ImageResponse(threeDimension, keyWord);
+  public static ImageResponse create(String threeDimension, String prompt) {
+    return new ImageResponse(threeDimension, prompt);
   }
 }

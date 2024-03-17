@@ -1,8 +1,10 @@
 package com.hyunn.capstone.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hyunn.capstone.dto.Request.ImageRequest;
+import com.hyunn.capstone.dto.Response.ImageResponse;
 import com.hyunn.capstone.service.ImageService;
-import com.hyunn.capstone.service.LumaApiService;
+import com.hyunn.capstone.service.PressoApiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImageController {
 
   public final ImageService imageService;
-  public final LumaApiService lumaApiService;
+  public final PressoApiService pressoApiService;
 
-  // 프론트 -> 스프링 -> 플라스크 -> 스프링 -> LUMA -> 프론트
+  // 프론트 -> 스프링 -> 플라스크 -> 스프링 -> presso -> 프론트
   //    create              result            ???
   @PostMapping("/create")
   public void imageToText(
@@ -28,10 +30,11 @@ public class ImageController {
 
   }
 
-  @PostMapping("/result/{key_word}")
-  public void textTo3D(
-      @PathVariable String keyWord, @Valid @RequestBody ImageRequest imageRequest) {
-    // keyWord를 받아서 이를 LUMA API를 통해 3D로 변경한다.
+  @PostMapping("/result/{keyWord}")
+  public ImageResponse textTo3D(
+      @PathVariable String keyWord, @Valid @RequestBody ImageRequest imageRequest)
+      throws JsonProcessingException, InterruptedException {
+    return pressoApiService.textTo3D(imageRequest, keyWord);
   }
 
 
