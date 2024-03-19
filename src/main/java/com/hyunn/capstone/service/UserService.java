@@ -1,7 +1,7 @@
 package com.hyunn.capstone.service;
 
 import com.hyunn.capstone.dto.Request.UserRequest;
-import com.hyunn.capstone.dto.Response.ImageResponse;
+import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.dto.UserDto;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
@@ -9,6 +9,7 @@ import com.hyunn.capstone.exception.UserAlreadyExistException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class UserService {
   /**
    * 로그인
    */
-  public UserDto login(UserDto userDto) {
+  public UserDto login(UserDto userDto,Long imageId) {
     // userDto에서 필요 정보 추출
     String phone = userDto.getPhone();
     String password = userDto.getPassword();
@@ -50,6 +51,13 @@ public class UserService {
     // 기존 계정이 없는 경우
     User newUser = User.createUser(phone, password, address);
     userJpaRepository.save(newUser);
+
+    // image에 유저 연결
+    Optional<Image> image = imageJpaRepository.findById(imageId);
+    Image targetImage = image.get();
+    targetImage.connectUser(newUser);
+    imageJpaRepository.save(targetImage);
+
     return UserDto.create(newUser.getPhone(), newUser.getPassword(), newUser.getAddress());
   }
 
@@ -66,7 +74,7 @@ public class UserService {
   }
 
   /**
-   * 계정 탈퇴 (휴면 계정으로 변경) -> 한달 후 삭제하도록 로직 찾아보자!
+   * 계정 탈퇴 (휴면 계정으로 변경) -> 한달 후 삭제
    */
   public void deleteUser(UserRequest userRequest) {
     String phone = userRequest.getPhone();
@@ -85,7 +93,7 @@ public class UserService {
   /**
    * 유저 정보로 관련 이미지 리스트로 반환하기
    */
-  public List<ImageResponse> findImagesByUser(UserRequest userRequest) {
+  public List<ThreeDimensionResponse> findImagesByUser(UserRequest userRequest) {
     String phone = userRequest.getPhone();
     String password = userRequest.getPassword();
 
@@ -101,11 +109,26 @@ public class UserService {
     List<Image> images = imageJpaRepository.findAllByUser(existUser);
 
     // Entity에서 Dto로 변형
-    List<ImageResponse> imageResponses = images.stream()
-        .map(image -> new ImageResponse(image.getThreeDimension(), image.getKeyWord()))
+    List<ThreeDimensionResponse> imageResponses = images.stream()
+        .map(image -> ThreeDimensionResponse.create(image.getImageId(), image.getImage(),
+            image.getThreeDimension(), image.getKeyWord()))
         .collect(Collectors.toList());
 
     return imageResponses;
+  }
+
+  /**
+   * 자동으로 삭제 대상 사용자를 삭제합니다.
+   */
+  public void deleteInactiveUsers() {
+    // 1달 이상 활동이 없는 사용자를 조회합니다.
+    LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+    List<User> inactiveUsers = userJpaRepository.findInactiveUsers(oneMonthAgo);
+
+    // 삭제 대상 사용자를 삭제합니다.
+    for (User user : inactiveUsers) {
+      userJpaRepository.delete(user);
+    }
   }
 
 }
