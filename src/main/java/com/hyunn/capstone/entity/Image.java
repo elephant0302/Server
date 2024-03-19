@@ -51,17 +51,26 @@ public class Image extends BaseEntity {
   private User user;
 
   private Image(String image, String threeDimension, String keyWord, String emotion,
-      String gender) {
+      String gender, User user) {
     this.image = image;
     this.threeDimension = threeDimension;
     this.keyWord = keyWord;
     this.emotion = emotion;
     this.gender = gender;
+    this.user = user;
   }
 
   public static Image createImage(String image, String threeDimension, String keyWord,
-      String emotion, String gender) {
-    return new Image(image, threeDimension, keyWord, emotion, gender);
+      String emotion, String gender, User user) {
+    return new Image(image, threeDimension, keyWord, emotion, gender, user);
+  }
+
+  public void connectUser(User user) {
+    this.user = user;
+  }
+
+  public void update3D(String threeDimension) {
+    this.threeDimension = threeDimension;
   }
 
 }
