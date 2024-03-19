@@ -1,6 +1,9 @@
 package com.hyunn.capstone.exception.Handler;
 
-import static com.hyunn.capstone.exception.ErrorStatus.*;
+import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
+import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
+import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
+import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
 import com.hyunn.capstone.controller.UserController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;

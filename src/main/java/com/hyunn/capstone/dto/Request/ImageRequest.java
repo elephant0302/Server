@@ -1,13 +1,12 @@
 package com.hyunn.capstone.dto.Request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 // 유저에게 요청 받는 dto
 @Getter
 public class ImageRequest {
+
   @NotBlank(message = "이미지를 입력해주세요.")
   private String image;
 

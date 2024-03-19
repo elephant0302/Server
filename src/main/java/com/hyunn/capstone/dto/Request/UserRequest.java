@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class UserRequest {
+
   @NotBlank(message = "핸드폰 번호를 입력해주세요.")
   @Pattern(regexp = "^\\d{11}$", message = "핸드폰 번호는 11자리여야 합니다.")
   private String phone;
@@ -21,7 +22,7 @@ public class UserRequest {
     this.password = password;
   }
 
-  public static UserRequest create (String phone, String password) {
+  public static UserRequest create(String phone, String password) {
     return new UserRequest(phone, password);
   }
 }
