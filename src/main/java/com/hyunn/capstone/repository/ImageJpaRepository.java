@@ -10,4 +10,5 @@ public interface ImageJpaRepository extends JpaRepository<Image, Long> {
 
   List<Image> findAllByUser(Optional<User> user);
 
+  Optional<Image> findImageByThreeDimension(String threeDimension);
 }

@@ -6,11 +6,11 @@ import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
-import com.hyunn.capstone.controller.UserController;
+import com.hyunn.capstone.controller.ImageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
-import com.hyunn.capstone.exception.UserAlreadyExistException;
-import com.hyunn.capstone.exception.UserNotFoundException;
+import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.ImageNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -29,24 +29,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {UserController.class})
-public class UserExceptionHandler {
+@RestControllerAdvice(assignableTypes = {ImageController.class})
+public class ImageExceptionHandler {
 
-  // 유저를 찾을 수 없는 경우
-  @ExceptionHandler(UserNotFoundException.class)
+  // API 응답이 올바르지 않은 경우
+  @ExceptionHandler(ApiNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
+  public ApiStandardResponse<ErrorResponse> handleApiNotFoundException(ApiNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // 휴면 계정이 있는 경우
-  @ExceptionHandler(UserAlreadyExistException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleUserAlreadyExistException(
-      UserAlreadyExistException e) {
+  // 이미지를 찾을 수 없는 경우
+  @ExceptionHandler(ImageNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());

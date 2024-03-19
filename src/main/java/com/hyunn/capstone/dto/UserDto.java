@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class UserDto {
+
   @NotBlank(message = "핸드폰 번호를 입력해주세요.")
   @Pattern(regexp = "^\\d{11}$", message = "핸드폰 번호는 11자리여야 합니다.")
   private String phone;

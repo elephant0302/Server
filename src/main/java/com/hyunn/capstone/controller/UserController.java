@@ -2,7 +2,7 @@ package com.hyunn.capstone.controller;
 
 import com.hyunn.capstone.dto.Request.UserRequest;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ImageResponse;
+import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.dto.UserDto;
 import com.hyunn.capstone.service.UserService;
 import jakarta.validation.Valid;
@@ -26,10 +26,11 @@ public class UserController {
 
   private final UserService userService;
 
-  @PostMapping("/login")
+  @PostMapping("/login/{imageId}")
   public ResponseEntity<ApiStandardResponse<UserDto>> login(
+      @PathVariable @Min(value = 1, message = "이미지 ID는 1 이상의 정수입니다.") Long imageId,
       @Valid @RequestBody UserDto requestUserDto) {
-    UserDto userDto = userService.login(requestUserDto);
+    UserDto userDto = userService.login(requestUserDto, imageId);
     return ResponseEntity.ok(ApiStandardResponse.success(userDto));
   }
 
@@ -48,9 +49,9 @@ public class UserController {
   }
 
   @GetMapping("/images")
-  public ResponseEntity<ApiStandardResponse<List<ImageResponse>>> findImagesByUser(
+  public ResponseEntity<ApiStandardResponse<List<ThreeDimensionResponse>>> findImagesByUser(
       @Valid @RequestBody UserRequest userRequest) {
-    List<ImageResponse> images = userService.findImagesByUser(userRequest);
+    List<ThreeDimensionResponse> images = userService.findImagesByUser(userRequest);
     return ResponseEntity.ok(ApiStandardResponse.success(images));
   }
 
