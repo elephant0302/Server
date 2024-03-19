@@ -9,6 +9,7 @@ import com.hyunn.capstone.controller.ImageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.ImageNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -33,6 +34,16 @@ public class ImageExceptionHandler {
   @ExceptionHandler(ApiNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiStandardResponse<ErrorResponse> handleApiNotFoundException(ApiNotFoundException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 이미지를 찾을 수 없는 경우
+  @ExceptionHandler(ImageNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
