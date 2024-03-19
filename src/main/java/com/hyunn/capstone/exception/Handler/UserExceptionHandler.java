@@ -2,6 +2,7 @@ package com.hyunn.capstone.exception.Handler;
 
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
+import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -112,13 +114,23 @@ public class UserExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // validation 외 JSON 형식 오류
+  // JSON 형식 오류
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiStandardResponse<ErrorResponse> handleHttpMessageNotReadableException(
       HttpMessageNotReadableException e) {
     ErrorResponse errorResponse = ErrorResponse.create(INVALID_JSON_EXCEPTION,
         "올바르지 않은 JSON 형식입니다.");
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 형식 오류
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+      HttpMediaTypeNotSupportedException e) {
+    ErrorResponse errorResponse = ErrorResponse.create(MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION,
+        "지원하지 않는 형식의 데이터 요청입니다.");
     return ApiStandardResponse.fail(errorResponse);
   }
 }
