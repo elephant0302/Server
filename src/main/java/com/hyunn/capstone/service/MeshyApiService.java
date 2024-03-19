@@ -3,14 +3,13 @@ package com.hyunn.capstone.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.hyunn.capstone.dto.Request.ImageRequest;
 import com.hyunn.capstone.dto.Response.ImageResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -25,59 +24,38 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class PressoApiService {
+public class MeshyApiService {
 
-  @Value("${3dpresso.apiKey}")
-  private String pressoApiKey;
-
-  @Value("${3dpresso.callBackUrl}")
-  private String callBackUrl;
-
-  @Value("${cloud.aws.credentials.accessKey}")
-  private String accessKey;
-
-  @Value("${cloud.aws.credentials.secretKey}")
-  private String secretKey;
-
-  @Value("${cloud.aws.s3.bucket}")
-  private String bucketName;
+  @Value("${meshy.apiKey}")
+  private String meshyApiKey;
 
   private final ImageJpaRepository imageJpaRepository;
 
-
+  /**
+   * 키워드를 3D로 변경 후 이미지 DB에 저장
+   */
   public ImageResponse textTo3D(ImageRequest imageRequest, String keyWord)
       throws JsonProcessingException, InterruptedException {
     String gender = imageRequest.getGender();
     String emotion = imageRequest.getEmotion();
 
-    String apiUrl = "https://api.3dpresso.ai/prod/api/v2/task";
+    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("Authorization", "Bearer " + pressoApiKey);
+    headers.set("Authorization", "Bearer " + meshyApiKey);
 
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
-    String name = createName(keyWord);
-    requestBody.put("fileName", name);
-    requestBody.put("engineName", "text_to_3d");
-    requestBody.put("description", gender + " " + emotion + " " + keyWord);
+    requestBody.put("mode", "preview");
+    requestBody.put("prompt", keyWord);
 
-    // params 섹션을 구성합니다.
-    Map<String, Object> params = new HashMap<>();
-    String prompt = gender + ", " + emotion + ", " + keyWord;
-    params.put("prompt", prompt);
-    requestBody.put("params", params);
-    requestBody.put("callbackUrl", callBackUrl);
+    String art_style = "realistic";
+    requestBody.put("art_style", art_style);
 
-    // destinationContext 섹션을 구성합니다.
-    Map<String, Object> destinationContext = new HashMap<>();
-    destinationContext.put("type", "s3");
-    destinationContext.put("accessKeyId", accessKey);
-    destinationContext.put("secretAccessKey", secretKey);
-    destinationContext.put("bucketName", bucketName);
-    destinationContext.put("folder", "/JRGB");
-    requestBody.put("destinationContext", destinationContext);
+    // 프롬포트는 추가적인 수정이 필요함.
+    String prompt = gender + ", " + emotion;
+    requestBody.put("negative_prompt", prompt);
 
     // HttpEntity를 생성합니다.
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
@@ -85,7 +63,7 @@ public class PressoApiService {
     // API 호출을 수행합니다.
     ResponseEntity<String> response = restTemplate.exchange(
         apiUrl,
-        HttpMethod.PUT,
+        HttpMethod.POST,
         requestEntity,
         String.class
     );
@@ -107,33 +85,67 @@ public class PressoApiService {
     }
     ObjectMapper mapper = new ObjectMapper();
     JsonNode responseJson = mapper.readTree(responseBody);
-    String seq = responseJson.get("seq").asText();
+    String preview_result = responseJson.get("result").asText();
 
-    Thread.sleep(2 * 60 * 1000);
-    String threeDimension = return3D(seq);
+    String result = refine3D(preview_result);
+    String threeDimension = return3D(result);
 
-    Image newImage = Image.createImage(imageRequest.getImage(), threeDimension, keyWord, emotion, gender);
+    Image newImage = Image.createImage(imageRequest.getImage(), threeDimension, keyWord, emotion,
+        gender);
     imageJpaRepository.save(newImage);
-    return new ImageResponse(threeDimension ,prompt);
+    return new ImageResponse(threeDimension, prompt);
 
   }
 
-  public String createName(String keyWord) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
-    ZoneId koreaZoneId = ZoneId.of("Asia/Seoul"); // 대한민국 시간대
-    String currentDateTime = ZonedDateTime.now(koreaZoneId).format(formatter);
-    return currentDateTime + "_" + keyWord;
-  }
-
-  public String return3D(String seq) throws JsonProcessingException {
-    String apiUrl = "https://api.3dpresso.ai/prod/api/v2/task";
+  /**
+   * 3D refine 작업
+   */
+  public String refine3D(String preview_result) throws JsonProcessingException {
+    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("Authorization", "Bearer " + pressoApiKey);
+    headers.set("Authorization", "Bearer " + meshyApiKey);
 
-    String seqUrl = "?seq=" + seq;
-    apiUrl += seqUrl;
+    // 요청 바디를 구성합니다.
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put("mode", "refine");
+    requestBody.put("preview_task_id", preview_result);
+
+    // HttpEntity를 생성합니다.
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(headers);
+
+    // API 호출을 수행합니다.
+    ResponseEntity<String> response = restTemplate.exchange(
+        apiUrl,
+        HttpMethod.POST,
+        requestEntity,
+        String.class
+    );
+
+    // JSON 파싱
+    String responseBody = response.getBody();
+    if (responseBody == null || responseBody.isEmpty()) {
+      throw new ApiNotFoundException("API 응답이 비어 있습니다.");
+    }
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode responseJson = mapper.readTree(responseBody);
+    String result = responseJson.get("result").asText();
+
+    return result;
+  }
+
+  /**
+   * 3D 모델 반환
+   */
+  public String return3D(String result) throws JsonProcessingException {
+    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
+    RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + meshyApiKey);
+
+    String resultUrl = "/" + result;
+    apiUrl += resultUrl;
 
     // HttpEntity를 생성합니다.
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(headers);
@@ -151,10 +163,17 @@ public class PressoApiService {
     if (responseBody == null || responseBody.isEmpty()) {
       throw new ApiNotFoundException("API 응답이 비어 있습니다.");
     }
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode responseJson = mapper.readTree(responseBody);
-    String url = responseJson.get("url").asText();
 
-    return url;
+    JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
+
+    String status = jsonObject.get("status").getAsString();
+    if (status != "SUCCEEDED") {
+      throw new ApiNotFoundException("3D 생성 실패 : " + status);
+    }
+    String threeDimensionUrl = jsonObject.getAsJsonObject("model_urls").get("obj").getAsString();
+
+    return threeDimensionUrl;
   }
+
 }
+
