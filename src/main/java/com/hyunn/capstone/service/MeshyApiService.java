@@ -9,9 +9,12 @@ import com.hyunn.capstone.dto.Request.ImageRequest;
 import com.hyunn.capstone.dto.Response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
+import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
+import com.hyunn.capstone.repository.UserJpaRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,12 +36,16 @@ public class MeshyApiService {
   private String meshyApiKey;
 
   private final ImageJpaRepository imageJpaRepository;
+  private final UserJpaRepository userJpaRepository;
 
   /**
    * text_to_3d
    */
   public ThreeDimensionCreateResponse textTo3D(ImageRequest imageRequest, String keyWord)
       throws JsonProcessingException {
+    Optional<User> rootUser = Optional.ofNullable(userJpaRepository.findById(1L)
+        .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+
     String gender = imageRequest.getGender();
     String emotion = imageRequest.getEmotion();
 
@@ -57,7 +64,7 @@ public class MeshyApiService {
     requestBody.put("art_style", artStyle);
 
     // 프롬포트는 추가적인 수정이 필요함.
-    String prompt = gender + ", " + emotion;
+    String prompt = gender + ", " + emotion + ", popmart toy";
     requestBody.put("negative_prompt", prompt);
 
     // HttpEntity를 생성합니다.
@@ -92,7 +99,7 @@ public class MeshyApiService {
     String previewResult = responseJson.get("result").asText();
 
     Image newImage = Image.createImage(imageRequest.getImage(), previewResult, keyWord, emotion,
-        gender, null);
+        gender, rootUser.get());
     imageJpaRepository.save(newImage);
     return ThreeDimensionCreateResponse.create(newImage.getImageId(), newImage.getThreeDimension(),
         newImage.getKeyWord());
@@ -141,7 +148,6 @@ public class MeshyApiService {
     String status = jsonObject.get("status").getAsString();
     String progress = jsonObject.get("progress").getAsString();
     String keyWord = jsonObject.get("prompt").getAsString(); // 키워드
-    // String negativePrompt = jsonObject.get("negative_prompt").getAsString();
 
     // 응답값 설정
     String message = "";
@@ -160,6 +166,7 @@ public class MeshyApiService {
               .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
       Image targetImage = existImage.get();
       targetImage.update3D(message);
+      imageJpaRepository.save(targetImage);
 
       userId = targetImage.getImageId();
       image = targetImage.getImage();
@@ -169,21 +176,8 @@ public class MeshyApiService {
     return ThreeDimensionResponse.create(userId, image, message, keyWord);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   /**
-   * 3D 모델 정제 -> 필요성을 모르겠음
+   * 3D 모델 정제
    */
   public String refine3D(String preview_result) throws JsonProcessingException {
     String apiUrl = "https://api.meshy.ai/v2/text-to-3d";

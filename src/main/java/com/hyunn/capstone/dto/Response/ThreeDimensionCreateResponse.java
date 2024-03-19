@@ -9,15 +9,15 @@ public class ThreeDimensionCreateResponse {
 
   private String previewResult;
 
-  private String prompt;
+  private String keyWord;
 
-  public ThreeDimensionCreateResponse(Long imageId, String previewResult, String prompt) {
+  public ThreeDimensionCreateResponse(Long imageId, String previewResult, String keyWord) {
     this.imageId = imageId;
     this.previewResult = previewResult;
-    this.prompt = prompt;
+    this.keyWord = keyWord;
   }
 
-  public static ThreeDimensionCreateResponse create(Long imageId, String previewResult, String prompt) {
-    return new ThreeDimensionCreateResponse(imageId, previewResult, prompt);
+  public static ThreeDimensionCreateResponse create(Long imageId, String previewResult, String keyWord) {
+    return new ThreeDimensionCreateResponse(imageId, previewResult, keyWord);
   }
 }
