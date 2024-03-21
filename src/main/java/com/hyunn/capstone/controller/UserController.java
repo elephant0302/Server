@@ -24,10 +24,10 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping("/address")
-  public ResponseEntity<ApiStandardResponse<String>> setAddress(
+  public ResponseEntity<ApiStandardResponse<String>> updateAddress(
       @Valid @RequestBody UserRequest userRequest,
       @RequestParam String address) {
-    String message = userService.setAddress(userRequest, address);
+    String message = userService.updateAddress(userRequest, address);
     return ResponseEntity.ok(ApiStandardResponse.success(message));
   }
 

@@ -24,7 +24,7 @@ public class UserService {
   /**
    * 주소 등록
    */
-  public String setAddress(UserRequest userRequest, String address) {
+  public String updateAddress(UserRequest userRequest, String address) {
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
 
@@ -33,7 +33,7 @@ public class UserService {
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     User existUser = user.get();
-    existUser.setAddress(address);
+    existUser.updateAddress(address);
     userJpaRepository.save(existUser);
     return "이메일이 성공적으로 등록되었습니다." + address;
   }
@@ -104,4 +104,5 @@ public class UserService {
 
     return imageResponses;
   }
+
 }
