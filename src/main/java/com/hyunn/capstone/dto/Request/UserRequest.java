@@ -11,18 +11,16 @@ public class UserRequest {
   @Pattern(regexp = "^\\d{11}$", message = "핸드폰 번호는 11자리여야 합니다.")
   private String phone;
 
-  @NotBlank(message = "비밀번호를 입력해주세요.")
-  @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
-      message = "비밀번호는 영문자, 숫자, 특수문자를 모두 포함하여 8자리 이상이어야 합니다.")
-  private String password;
+  @NotBlank(message = "이메일을 입력해주세요.")
+  private String email;
 
 
-  public UserRequest(String phone, String password) {
+  public UserRequest(String phone, String email) {
     this.phone = phone;
-    this.password = password;
+    this.email = email;
   }
 
-  public static UserRequest create(String phone, String password) {
-    return new UserRequest(phone, password);
+  public static UserRequest create(String phone, String email) {
+    return new UserRequest(phone, email);
   }
 }

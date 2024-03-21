@@ -22,39 +22,37 @@ public class User extends BaseEntity {
   @Column(name = "user_id")
   private Long userId;
 
+  // 닉네임
+  @Column(name = "nickname")
+  private String nickName;
+
+  // 이메일
+  @Column(name = "email")
+  private String email;
+
   // 전화번호
   @Column(name = "phone")
   private String phone;
-
-  // 비밀번호
-  @Column(name = "password")
-  private String password;
 
   // 주소
   @Column(name = "address")
   private String address;
 
-  // 회원 상태
-  @Column(name = "status")
-  private Boolean status;
 
-  private User(String phone, String password, String address) {
+  private User(String nickName, String email, String phone, String address) {
+    this.nickName = nickName;
+    this.email = email;
     this.phone = phone;
-    this.password = password;
     this.address = address;
-    this.status = true;
   }
 
-  public static User createUser(String phone, String password, String address) {
-    return new User(phone, password, address);
+  public static User createUser(String nickName, String email, String phone, String address) {
+    return new User(nickName, email, phone, address);
   }
 
-  public void deleteUser() {
-    this.status = false;
-  }
 
-  public void rollBackUser() {
-    this.status = true;
+  public void setAddress(String address) {
+    this.address = address;
   }
 
 }
