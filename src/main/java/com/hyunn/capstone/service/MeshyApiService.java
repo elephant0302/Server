@@ -49,7 +49,7 @@ public class MeshyApiService {
     String gender = imageRequest.getGender();
     String emotion = imageRequest.getEmotion();
 
-    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
+    String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -72,7 +72,7 @@ public class MeshyApiService {
 
     // API 호출을 수행합니다.
     ResponseEntity<String> response = restTemplate.exchange(
-        apiUrl,
+        apiUri,
         HttpMethod.POST,
         requestEntity,
         String.class
@@ -109,20 +109,20 @@ public class MeshyApiService {
    * 3D 모델 반환
    */
   public ThreeDimensionResponse return3D(String preview_result) {
-    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
+    String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "Bearer " + meshyApiKey);
 
     String resultUrl = "/" + preview_result;
-    apiUrl += resultUrl;
+    apiUri += resultUrl;
 
     // HttpEntity를 생성합니다.
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(headers);
 
     // API 호출을 수행합니다.
     ResponseEntity<String> response = restTemplate.exchange(
-        apiUrl,
+        apiUri,
         HttpMethod.GET,
         requestEntity,
         String.class
@@ -180,7 +180,7 @@ public class MeshyApiService {
    * 3D 모델 정제
    */
   public String refine3D(String preview_result) throws JsonProcessingException {
-    String apiUrl = "https://api.meshy.ai/v2/text-to-3d";
+    String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -197,7 +197,7 @@ public class MeshyApiService {
 
     // API 호출을 수행합니다.
     ResponseEntity<String> response = restTemplate.exchange(
-        apiUrl,
+        apiUri,
         HttpMethod.POST,
         requestEntity,
         String.class

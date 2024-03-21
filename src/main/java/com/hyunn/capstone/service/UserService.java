@@ -2,14 +2,12 @@ package com.hyunn.capstone.service;
 
 import com.hyunn.capstone.dto.Request.UserRequest;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
-import com.hyunn.capstone.dto.UserDto;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
-import com.hyunn.capstone.exception.UserAlreadyExistException;
+import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,70 +22,65 @@ public class UserService {
   private final ImageJpaRepository imageJpaRepository;
 
   /**
-   * 로그인
+   * 주소 등록
    */
-  public UserDto login(UserDto userDto,Long imageId) {
-    // userDto에서 필요 정보 추출
-    String phone = userDto.getPhone();
-    String password = userDto.getPassword();
-    String address = userDto.getAddress();
+  public String setAddress(UserRequest userRequest, String address) {
+    String phone = userRequest.getPhone();
+    String email = userRequest.getEmail();
 
-    // 기존 계정이 있는 경우
-    if (userJpaRepository.existsUserByPhoneAndPassword(phone, password)) {
-      Optional<User> existUser = Optional.ofNullable(
-          userJpaRepository.findUserByPhoneAndPassword(phone, password)
-              .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    Optional<User> user = Optional.ofNullable(
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-      // 휴면 계정이 존재하는 경우
-      if (!existUser.get().getStatus()) {
-        Long id = existUser.get().getUserId();
-        throw new UserAlreadyExistException("휴면 계정이 존재합니다. id : " + id);
-      }
+    User existUser = user.get();
+    existUser.setAddress(address);
+    userJpaRepository.save(existUser);
+    return "이메일이 성공적으로 등록되었습니다." + address;
+  }
 
-      return UserDto.create(existUser.get().getPhone(), existUser.get().getPassword(),
-          existUser.get().getAddress());
+  /**
+   * 이미지 등록
+   */
+  public String setImage(UserRequest userRequest, Long imageId) {
+    String phone = userRequest.getPhone();
+    String email = userRequest.getEmail();
+
+    Optional<User> user = Optional.ofNullable(
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    User existUser = user.get();
+
+    Optional<Image> image = Optional.ofNullable(
+        imageJpaRepository.findById(imageId)
+            .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
+    Image existImage = image.get();
+    existImage.connectUser(existUser);
+    imageJpaRepository.save(existImage);
+
+    String message = "";
+    if (existUser.getUserId() == existImage.getUser().getUserId()) {
+      message = "성공적으로 연결되었습니다.";
+    } else {
+      message = "연결에 실패했습니다. 다시 시도해주세요.";
     }
 
-    // 기존 계정이 없는 경우
-    User newUser = User.createUser(phone, password, address);
-    userJpaRepository.save(newUser);
-
-    // image에 유저 연결
-    Optional<Image> image = imageJpaRepository.findById(imageId);
-    Image targetImage = image.get();
-    targetImage.connectUser(newUser);
-    imageJpaRepository.save(targetImage);
-
-    return UserDto.create(newUser.getPhone(), newUser.getPassword(), newUser.getAddress());
+    return message;
   }
 
-  /**
-   * 휴면 계정 복구
-   */
-  public UserDto rollBack(Long userId) {
-    Optional<User> user = Optional.ofNullable(userJpaRepository.findById(userId)
-        .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-    User existUser = user.get();
-    existUser.rollBackUser();
-    userJpaRepository.save(existUser);
-    return UserDto.create(existUser.getPhone(), existUser.getPassword(), existUser.getAddress());
-  }
 
   /**
-   * 계정 탈퇴 (휴면 계정으로 변경) -> 한달 후 삭제
+   * 유저 삭제
    */
   public void deleteUser(UserRequest userRequest) {
     String phone = userRequest.getPhone();
-    String password = userRequest.getPassword();
+    String email = userRequest.getEmail();
 
-    // 계정이 없는 경우
-    Optional<User> existUser = Optional.ofNullable(
-        userJpaRepository.findUserByPhoneAndPassword(phone, password)
+    Optional<User> user = Optional.ofNullable(
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    User deleteUser = existUser.get();
-    deleteUser.deleteUser();
-    userJpaRepository.save(deleteUser);
+    User existUser = user.get();
+    userJpaRepository.delete(existUser);
   }
 
   /**
@@ -95,16 +88,11 @@ public class UserService {
    */
   public List<ThreeDimensionResponse> findImagesByUser(UserRequest userRequest) {
     String phone = userRequest.getPhone();
-    String password = userRequest.getPassword();
+    String email = userRequest.getEmail();
 
     Optional<User> existUser = Optional.ofNullable(
-        userJpaRepository.findUserByPhoneAndPassword(phone, password)
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-
-    // 휴면 계정이 존재하는 경우, 없는 걸로 처리
-    if (!existUser.get().getStatus()) {
-      throw new UserAlreadyExistException("유저 정보를 가져오지 못했습니다.");
-    }
 
     List<Image> images = imageJpaRepository.findAllByUser(existUser);
 
@@ -116,19 +104,4 @@ public class UserService {
 
     return imageResponses;
   }
-
-  /**
-   * 자동으로 삭제 대상 사용자를 삭제합니다.
-   */
-  public void deleteInactiveUsers() {
-    // 1달 이상 활동이 없는 사용자를 조회합니다.
-    LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
-    List<User> inactiveUsers = userJpaRepository.findInactiveUsers(oneMonthAgo);
-
-    // 삭제 대상 사용자를 삭제합니다.
-    for (User user : inactiveUsers) {
-      userJpaRepository.delete(user);
-    }
-  }
-
 }

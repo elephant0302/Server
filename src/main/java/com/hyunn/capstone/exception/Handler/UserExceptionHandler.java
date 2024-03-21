@@ -9,7 +9,7 @@ import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 import com.hyunn.capstone.controller.UserController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
-import com.hyunn.capstone.exception.UserAlreadyExistException;
+import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -42,11 +42,10 @@ public class UserExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // 휴면 계정이 있는 경우
-  @ExceptionHandler(UserAlreadyExistException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleUserAlreadyExistException(
-      UserAlreadyExistException e) {
+  // 이미지를 찾을 수 없는 경우
+  @ExceptionHandler(ImageNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
