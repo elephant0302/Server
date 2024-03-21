@@ -5,7 +5,6 @@ import com.hyunn.capstone.dto.Request.ImageRequest;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
-import com.hyunn.capstone.service.ImageService;
 import com.hyunn.capstone.service.MeshyApiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/images")
 public class ImageController {
 
-  public final ImageService imageService;
-  public final MeshyApiService meshyApiService;
+  private final MeshyApiService meshyApiService;
 
   // 프론트 -> 스프링 -> 플라스크 -> 스프링 -> meshy -> 프론트
   //        imageToText           textTo3D   return3D
@@ -37,7 +35,8 @@ public class ImageController {
   public ResponseEntity<ApiStandardResponse<ThreeDimensionCreateResponse>> textTo3D(
       @PathVariable String keyWord, @Valid @RequestBody ImageRequest imageRequest)
       throws JsonProcessingException {
-    ThreeDimensionCreateResponse threeDimensionCreateResponse =  meshyApiService.textTo3D(imageRequest, keyWord);
+    ThreeDimensionCreateResponse threeDimensionCreateResponse = meshyApiService.textTo3D(
+        imageRequest, keyWord);
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionCreateResponse));
   }
 
@@ -48,6 +47,7 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
   }
 
+  // 일단 사용하지 않을 듯...?
   @PostMapping("/refine/{previewResult}")
   public ResponseEntity<ApiStandardResponse<String>> refine3D(
       @PathVariable String previewResult) throws JsonProcessingException {
