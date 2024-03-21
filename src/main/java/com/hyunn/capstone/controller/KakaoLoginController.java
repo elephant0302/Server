@@ -1,7 +1,7 @@
 package com.hyunn.capstone.controller;
 
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.KakaoLoginResponse;
+import com.hyunn.capstone.dto.Response.UserResponse;
 import com.hyunn.capstone.service.KakaoLoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +18,11 @@ public class KakaoLoginController {
   private final KakaoLoginService kakaoLoginService;
 
   @GetMapping("/oauth2/code/kakao")
-  public ResponseEntity<ApiStandardResponse<KakaoLoginResponse>> kakaoLogin(
+  public ResponseEntity<ApiStandardResponse<UserResponse>> kakaoLogin(
       @RequestParam String code) {
-
     String accessToken = kakaoLoginService.getAccessToken(code);
-    KakaoLoginResponse kakaoLoginResponse = kakaoLoginService.getUserInfo(accessToken);
-    return ResponseEntity.ok(ApiStandardResponse.success(kakaoLoginResponse));
+    UserResponse userResponse = kakaoLoginService.getUserInfo(accessToken);
+    return ResponseEntity.ok(ApiStandardResponse.success(userResponse));
   }
-
 
 }

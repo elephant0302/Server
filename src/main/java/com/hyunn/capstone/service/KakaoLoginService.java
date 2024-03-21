@@ -3,7 +3,7 @@ package com.hyunn.capstone.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hyunn.capstone.dto.Response.KakaoLoginResponse;
+import com.hyunn.capstone.dto.Response.UserResponse;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
@@ -97,7 +97,7 @@ public class KakaoLoginService {
    * 배송지 받아오기
    */
   public String getUserAddress(String accessToken) {
-    String reqUri = "https://kapi.kakao.com/v2/user/shipping_address";
+    String reqUri = "https://kapi.kakao.com/v1/user/shipping_address";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "Bearer " + accessToken);
@@ -143,11 +143,10 @@ public class KakaoLoginService {
     return baseAddress;
   }
 
-
   /**
    * 로그인한 유저 정보 받아오기 -> 저장하기
    */
-  public KakaoLoginResponse getUserInfo(String accessToken) {
+  public UserResponse getUserInfo(String accessToken) {
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "Bearer " + accessToken);
@@ -181,26 +180,47 @@ public class KakaoLoginService {
     String email = jsonObject.getAsJsonObject("kakao_account").get("email").getAsString();
     String nickname = jsonObject.getAsJsonObject("kakao_account").getAsJsonObject("profile")
         .get("nickname").getAsString();
-    String phone = jsonObject.getAsJsonObject("kakao_account").get("phone_number")
+    String phoneNum = jsonObject.getAsJsonObject("kakao_account").get("phone_number")
         .getAsString();
+
+    // +82 10-1234-5678 -> 01012345678
+    String phone = extractNumber(phoneNum);
+    phone = phone.substring(2, 12);
+    phone = "0" + phone;
 
     // 이미 회원가입을 한 유저라면 바로 처리
     if (userJpaRepository.existsUserByPhoneAndEmail(phone, email)) {
-      Optional<User> existUser = Optional.ofNullable(
+      Optional<User> user = Optional.ofNullable(
           userJpaRepository.findUserByPhoneAndEmail(phone, email)
               .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-      return KakaoLoginResponse.create(existUser.get().getNickName(), existUser.get().getEmail(),
-          existUser.get().getPhone(), existUser.get().getAddress());
+      User existUser = user.get();
+      existUser.updateAccessToken(accessToken);
+      userJpaRepository.save(existUser);
+      return UserResponse.create(existUser.getNickName(), existUser.getEmail(),
+          existUser.getPhone(), existUser.getAddress(), existUser.getAccessToken());
     }
 
     // 배송지 받아오기
     String address = getUserAddress(accessToken);
 
     // 새로운 유저 저장
-    User newUser = User.createUser(nickname, email, phone, address);
+    User newUser = User.createUser(nickname, email, phone, address, accessToken);
     userJpaRepository.save(newUser);
 
-    return KakaoLoginResponse.create(nickname, email, phone, address);
+    return UserResponse.create(nickname, email, phone, address, accessToken);
+  }
+
+  /**
+   * 핸드폰 번호 파싱 함수
+   */
+  public static String extractNumber(String input) {
+    StringBuilder sb = new StringBuilder();
+    for (char c : input.toCharArray()) {
+      if (Character.isDigit(c)) {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
   }
 
 }
