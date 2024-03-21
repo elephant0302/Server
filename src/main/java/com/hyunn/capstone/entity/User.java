@@ -38,21 +38,29 @@ public class User extends BaseEntity {
   @Column(name = "address")
   private String address;
 
+  @Column(name = "access_token")
+  private String accessToken;
 
-  private User(String nickName, String email, String phone, String address) {
+
+  private User(String nickName, String email, String phone, String address, String accessToken) {
     this.nickName = nickName;
     this.email = email;
     this.phone = phone;
     this.address = address;
+    this.accessToken = accessToken;
   }
 
-  public static User createUser(String nickName, String email, String phone, String address) {
-    return new User(nickName, email, phone, address);
+  public static User createUser(String nickName, String email, String phone, String address,
+      String accessToken) {
+    return new User(nickName, email, phone, address, accessToken);
   }
 
-
-  public void setAddress(String address) {
+  public void updateAddress(String address) {
     this.address = address;
+  }
+
+  public void updateAccessToken(String accessToken) {
+    this.accessToken = accessToken;
   }
 
 }
