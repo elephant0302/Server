@@ -32,7 +32,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class MeshyApiService {
 
-  @Value("${meshy.apiKey}")
+  @Value("${meshy.api-key}")
   private String meshyApiKey;
 
   private final ImageJpaRepository imageJpaRepository;
