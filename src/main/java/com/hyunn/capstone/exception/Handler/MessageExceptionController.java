@@ -7,7 +7,7 @@ import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
 import com.hyunn.capstone.controller.KakaoLoginController;
-import com.hyunn.capstone.controller.KakaoTalkController;
+import com.hyunn.capstone.controller.MessageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {KakaoLoginController.class, KakaoTalkController.class})
-public class KakaoExceptionHandler {
+@RestControllerAdvice(assignableTypes = {MessageController.class})
+public class MessageExceptionController {
 
   // API 응답이 올바르지 않은 경우
   @ExceptionHandler(ApiNotFoundException.class)
