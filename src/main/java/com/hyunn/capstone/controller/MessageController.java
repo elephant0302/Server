@@ -30,7 +30,7 @@ public class MessageController {
 
   private final MessageService messageService;
 
-  @Operation(summary = "메세지 발송", description = "해당 유저에게 이메일과 문자 메세지를 발송한다.")
+  @Operation(summary = "메세지 발송 (유료)", description = "해당 유저에게 이메일과 문자 메세지를 발송한다. 1000회 가능")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "메세지 발송 설공"),
       @ApiResponse(responseCode = "400",
