@@ -76,10 +76,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
-            docker stop capstone-api
-            docker rm capstone-api
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
-            docker run -d -p 9000:9000 --name capstone-api ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
+            sudo docker stop capstone-api
+            sudo docker rm capstone-api
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
+            sudo docker run -d -p 9000:9000 --name capstone-api ${{ secrets.DOCKERHUB_USERNAME }}/capstone-repo
 
       - name: Remove Github Actions IP from security group
         if: always()
