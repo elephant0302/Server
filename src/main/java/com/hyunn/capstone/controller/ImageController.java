@@ -65,7 +65,7 @@ public class ImageController {
     // flask 서버에 api가 존재해야함 -> 전달하면 키워드를 받는 식으로
   }
 
-  @Operation(summary = "3D 모델 코드 생성", description = "3D 모델을 얻을 수 있는 코드를 받는다.")
+  @Operation(summary = "3D 모델 코드 생성 (유료)", description = "3D 모델을 얻을 수 있는 코드를 받는다. 30회 가능")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D 모델 코드 반환"),
       @ApiResponse(responseCode = "400",
@@ -132,7 +132,7 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
   }
 
-  @Operation(summary = "3D obj 정제 (미사용 API)", description = "사용 여부가 결정되지 않음.")
+  @Operation(summary = "3D obj 정제 (미사용 API, 유료)", description = "사용 여부가 결정되지 않음.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D obj 정제"),
       @ApiResponse(responseCode = "400",

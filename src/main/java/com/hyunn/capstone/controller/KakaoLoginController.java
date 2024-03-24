@@ -27,7 +27,7 @@ public class KakaoLoginController {
 
   @Operation(summary = "엑세스 토큰 발급 및 유저 생성 (자동 처리 로직)",
       description =
-          "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=681c7dd24caab6868c553a07b27422ed&redirect_uri=http://localhost:9000/api/login/oauth2/code/kakaod에서 로그인 후"
+          "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=681c7dd24caab6868c553a07b27422ed&redirect_uri=https://capstone.hyunn.site/api/login/oauth2/code/kakaod에서 로그인 후"
               + "\n카카오측에서 바로 리다이렉션 되는 엔드포인트로써 자동으로 처리된다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "카카오 로그인 성공"),
