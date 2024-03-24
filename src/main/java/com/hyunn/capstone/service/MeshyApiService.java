@@ -10,6 +10,7 @@ import com.hyunn.capstone.dto.Response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
+import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
@@ -32,6 +33,9 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class MeshyApiService {
 
+  @Value("${spring.security.x-api-key}")
+  private String xApiKey;
+
   @Value("${meshy.api-key}")
   private String meshyApiKey;
 
@@ -41,8 +45,13 @@ public class MeshyApiService {
   /**
    * text_to_3d
    */
-  public ThreeDimensionCreateResponse textTo3D(ImageRequest imageRequest, String keyWord)
+  public ThreeDimensionCreateResponse textTo3D(String apiKey, ImageRequest imageRequest, String keyWord)
       throws JsonProcessingException {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     Optional<User> rootUser = Optional.ofNullable(userJpaRepository.findById(1L)
         .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
@@ -108,7 +117,12 @@ public class MeshyApiService {
   /**
    * 3D 모델 반환
    */
-  public ThreeDimensionResponse return3D(String preview_result) {
+  public ThreeDimensionResponse return3D(String apiKey, String preview_result) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
@@ -179,7 +193,12 @@ public class MeshyApiService {
   /**
    * 3D 모델 정제
    */
-  public String refine3D(String preview_result) throws JsonProcessingException {
+  public String refine3D(String apiKey, String preview_result) throws JsonProcessingException {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();

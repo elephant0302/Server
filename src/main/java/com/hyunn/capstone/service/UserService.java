@@ -4,6 +4,7 @@ import com.hyunn.capstone.dto.Request.UserRequest;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
+import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
@@ -12,19 +13,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+  @Value("${spring.security.x-api-key}")
+  private String xApiKey;
+
   private final UserJpaRepository userJpaRepository;
   private final ImageJpaRepository imageJpaRepository;
 
   /**
-   * 주소 등록
+   * 주소 업데이트 (카카오 정보에 주소가 없는 경우나 주소를 수정할 경우)
    */
-  public String updateAddress(UserRequest userRequest, String address) {
+  public String updateAddress(String apiKey, UserRequest userRequest, String address) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
 
@@ -41,7 +51,11 @@ public class UserService {
   /**
    * 이미지 등록
    */
-  public String setImage(UserRequest userRequest, Long imageId) {
+  public String setImage(String apiKey, UserRequest userRequest, Long imageId) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
 
@@ -71,7 +85,12 @@ public class UserService {
   /**
    * 유저 삭제
    */
-  public void deleteUser(UserRequest userRequest) {
+  public void deleteUser(String apiKey, UserRequest userRequest) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
 
@@ -86,7 +105,12 @@ public class UserService {
   /**
    * 유저 정보로 관련 이미지 리스트로 반환하기
    */
-  public List<ThreeDimensionResponse> findImagesByUser(UserRequest userRequest) {
+  public List<ThreeDimensionResponse> findImagesByUser(String apiKey, UserRequest userRequest) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
 
