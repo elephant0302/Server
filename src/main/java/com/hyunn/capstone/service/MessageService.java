@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.Request.MessageRequest;
 import com.hyunn.capstone.dto.Response.MessageResponse;
 import com.hyunn.capstone.entity.User;
+import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.UserJpaRepository;
@@ -31,6 +32,9 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
+
+  @Value("${spring.security.x-api-key}")
+  private String xApiKey;
 
   @Value("${kakao-talk.redirect-uri}")
   private String kakaoTalkRedirectUri;
@@ -155,8 +159,13 @@ public class MessageService {
   /**
    * 각종 메세지 발송에 대한 응답 취합
    */
-  public MessageResponse sendMessage(MessageRequest messageRequest)
+  public MessageResponse sendMessage(String apiKey, MessageRequest messageRequest)
       throws JsonProcessingException {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String phone = messageRequest.getPhone();
     String email = messageRequest.getEmail();
     Optional<User> existUser = Optional.ofNullable(
@@ -173,7 +182,13 @@ public class MessageService {
   /**
    * 카카오톡 발송
    */
-  public String sendKakaoTalk(MessageRequest messageRequest) throws JsonProcessingException {
+  public String sendKakaoTalk(String apiKey, MessageRequest messageRequest)
+      throws JsonProcessingException {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
     String phone = messageRequest.getPhone();
     String email = messageRequest.getEmail();
 

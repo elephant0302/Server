@@ -1,11 +1,14 @@
 package com.hyunn.capstone.exception.Handler;
 
+import static com.hyunn.capstone.exception.ErrorStatus.API_NOT_FOUND_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.controller.ImageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
@@ -13,6 +16,7 @@ import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
@@ -130,6 +135,30 @@ public class ImageExceptionHandler {
       HttpMediaTypeNotSupportedException e) {
     ErrorResponse errorResponse = ErrorResponse.create(MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION,
         "지원하지 않는 형식의 데이터 요청입니다.");
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // Meshy AI 응답 오류
+  @ExceptionHandler(HttpClientErrorException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleHttpClientErrorException(
+      HttpClientErrorException e) {
+    String responseBody = e.getResponseBodyAsString();
+    String errorMessage = "응답 형식을 파악할 수 없습니다. 관리자에게 문의해주세요.";
+
+    if (responseBody != null && !responseBody.isEmpty()) {
+      try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        if (jsonNode.has("message")) {
+          errorMessage = jsonNode.get("message").asText();
+        }
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+    }
+
+    ErrorResponse errorResponse = ErrorResponse.create(API_NOT_FOUND_EXCEPTION, errorMessage);
     return ApiStandardResponse.fail(errorResponse);
   }
 }
