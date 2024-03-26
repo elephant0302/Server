@@ -100,7 +100,9 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionCreateResponse));
   }
 
-  @Operation(summary = "3D obj 생성", description = "3D 모델 코드로 3D obj를 생성, 반환")
+  @Operation(summary = "3D obj 생성", description = "3D 모델 코드로 3D obj를 생성, 반환"
+      + "\nmessage의 경우 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다."
+      + "\nuserId이 경우 1이면 루트 사용로 임시 할당된 것이다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D obj 반환"),
       @ApiResponse(responseCode = "400",
