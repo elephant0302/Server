@@ -8,8 +8,15 @@ import com.hyunn.capstone.dto.Response.MessageResponse;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.UserJpaRepository;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +26,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -92,15 +98,9 @@ public class MessageService {
   }
 
   /**
-   * 문자 메세지 발송
+   * 문자 메세지 발송 -> HttpURLConnection 사용
    */
-  public String sendSMS(String phone, String nickName) throws JsonProcessingException {
-    RestTemplate restTemplate = new RestTemplate();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("user-id", masterUserId);
-    headers.add("api-key", sendmApiKey);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
+  public String sendSMS(String phone, String nickName) throws IOException {
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("callerNo", senderNum);
@@ -108,59 +108,78 @@ public class MessageService {
     // 메세지
     String text = "[JRGB] " + nickName + "님 주문하신 상품의 출력이 완료되었습니다."
         + "\n홈페이지에 방문하셔서 확인해주세요.";
-    ;
     requestBody.put("message", text);
 
     String receiveNum =
         phone.substring(0, 3) + "-" + phone.substring(3, 7) + "-" + phone.substring(7);
     requestBody.put("receiveNos", receiveNum);
 
-    // HttpEntity를 생성합니다.
-    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+    // 요청을 보낼 URL 생성
+    URL url = new URL(sendmMessageUri);
 
-    // API 호출을 수행합니다.
-    ResponseEntity<String> response = restTemplate.exchange(
-        sendmMessageUri,
-        HttpMethod.POST,
-        requestEntity,
-        String.class
-    );
+    // Open a connection through the URL
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-    // API 응답을 처리합니다.
-    if (response.getStatusCode().is2xxSuccessful()) {
+    // 요청 방법 설정
+    connection.setRequestMethod("POST");
+
+    // 요청 헤더 설정
+    connection.setRequestProperty("user-id", masterUserId);
+    connection.setRequestProperty("api-key", sendmApiKey);
+    connection.setRequestProperty("Content-Type", "application/json");
+
+    // 요청 본문 설정
+    connection.setDoOutput(true);
+    try (OutputStream os = connection.getOutputStream()) {
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.writeValue(os, requestBody);
+    }
+
+    // 응답 처리
+    int responseCode = connection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
       // 성공적으로 API를 호출한 경우의 처리
-      System.out.println("API 호출 성공: " + response.getBody());
+      try (BufferedReader in = new BufferedReader(
+          new InputStreamReader(connection.getInputStream()))) {
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = in.readLine()) != null) {
+          response.append(line);
+        }
+        String responseBody = response.toString();
+        System.out.println("API 호출 성공: " + responseBody);
+
+        // JSON 파싱
+        if (responseBody == null || responseBody.isEmpty()) {
+          throw new ApiNotFoundException("문자 메세지 API 응답이 비어 있습니다.");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseJson = mapper.readTree(responseBody);
+        String code = responseJson.get("code").asText();
+        String message = responseJson.get("message").asText();
+
+        String result;
+        if (code.equals("0")) {
+          result = "문자 메시지 전송 성공! " + phone;
+        } else {
+          result = "문자 메시지 전송 실패: " + message;
+        }
+        connection.disconnect();
+        return result;
+      }
     } else {
       // API 호출이 실패한 경우의 처리
-      System.out.println("API 호출 실패: " + response.getStatusCode());
+      System.out.println("API 호출 실패: " + responseCode);
       throw new ApiNotFoundException("문자 메세지 API 호출에 문제가 생겼습니다.");
     }
-
-    // JSON 파싱
-    String responseBody = response.getBody();
-    if (responseBody == null || responseBody.isEmpty()) {
-      throw new ApiNotFoundException("문자 메세지 API 응답이 비어 있습니다.");
-    }
-
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode responseJson = mapper.readTree(responseBody);
-    String code = responseJson.get("code").asText();
-    String message = responseJson.get("message").asText();
-
-    String result = "";
-    if (code.equals("0")) {
-      result = "문자 메시지 전송 성공! " + phone;
-    } else {
-      result = "문자 메시지 전송 실패: " + message;
-    }
-    return result;
   }
 
   /**
    * 각종 메세지 발송에 대한 응답 취합
    */
   public MessageResponse sendMessage(String apiKey, MessageRequest messageRequest)
-      throws JsonProcessingException {
+      throws IOException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
@@ -168,6 +187,11 @@ public class MessageService {
 
     String phone = messageRequest.getPhone();
     String email = messageRequest.getEmail();
+
+    if (phone.equals("01012345678") && email.equals("root@naver.com")) {
+      throw new RootUserException("해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.");
+    }
+
     Optional<User> existUser = Optional.ofNullable(
         userJpaRepository.findUserByPhoneAndEmail(phone, email)
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));

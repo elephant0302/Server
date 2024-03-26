@@ -45,7 +45,8 @@ public class MeshyApiService {
   /**
    * text_to_3d
    */
-  public ThreeDimensionCreateResponse textTo3D(String apiKey, ImageRequest imageRequest, String keyWord)
+  public ThreeDimensionCreateResponse textTo3D(String apiKey, ImageRequest imageRequest,
+      String keyWord)
       throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -107,6 +108,7 @@ public class MeshyApiService {
     JsonNode responseJson = mapper.readTree(responseBody);
     String previewResult = responseJson.get("result").asText();
 
+    // 루트 유저에게 일단 할당
     Image newImage = Image.createImage(imageRequest.getImage(), previewResult, keyWord, emotion,
         gender, rootUser.get());
     imageJpaRepository.save(newImage);
@@ -164,8 +166,8 @@ public class MeshyApiService {
     String keyWord = jsonObject.get("prompt").getAsString(); // 키워드
 
     // 응답값 설정
-    String message = "";
-    Long userId = 991202L;
+    String message = ""; // 퍼센트 or 3D 이미지
+    Long userId = 1L;
     String image = "";
 
     if (status.equals("IN_PROGRESS")) {

@@ -6,6 +6,7 @@ import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
@@ -56,8 +57,13 @@ public class UserService {
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
+
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
+
+    if (phone.equals("01012345678") && email.equals("root@naver.com")) {
+      throw new RootUserException("해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.");
+    }
 
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhoneAndEmail(phone, email)
@@ -81,7 +87,6 @@ public class UserService {
     return message;
   }
 
-
   /**
    * 유저 삭제
    */
@@ -93,6 +98,10 @@ public class UserService {
 
     String phone = userRequest.getPhone();
     String email = userRequest.getEmail();
+
+    if (phone.equals("01012345678") && email.equals("root@naver.com")) {
+      throw new RootUserException("해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.");
+    }
 
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhoneAndEmail(phone, email)
