@@ -10,6 +10,7 @@ import com.hyunn.capstone.controller.UserController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -31,6 +32,16 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Slf4j
 @RestControllerAdvice(assignableTypes = {UserController.class})
 public class UserExceptionHandler {
+
+  // 루트 계정에 허가되지 않은 조작을 하는 경우
+  @ExceptionHandler(RootUserException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleRootUserException(RootUserException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
 
   // 유저를 찾을 수 없는 경우
   @ExceptionHandler(UserNotFoundException.class)

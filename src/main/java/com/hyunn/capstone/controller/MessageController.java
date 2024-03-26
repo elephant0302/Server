@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
@@ -37,7 +38,8 @@ public class MessageController {
           description = "1. 파라미터가 부족합니다. \t\n"
               + "2. 올바르지 않은 파라미터 값입니다. \t\n"
               + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
+              + "4. 지원하지 않는 형식의 데이터 요청입니다. \t\n"
+              + "5. 해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
@@ -56,7 +58,7 @@ public class MessageController {
   @PostMapping()
   public ResponseEntity<ApiStandardResponse<MessageResponse>> sendMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Valid @RequestBody MessageRequest messageRequest) throws JsonProcessingException {
+      @Valid @RequestBody MessageRequest messageRequest) throws IOException {
     MessageResponse messageResponse = messageService.sendMessage(apiKey, messageRequest);
     return ResponseEntity.ok(ApiStandardResponse.success(messageResponse));
   }
@@ -68,7 +70,8 @@ public class MessageController {
           description = "1. 파라미터가 부족합니다. \t\n"
               + "2. 올바르지 않은 파라미터 값입니다. \t\n"
               + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
+              + "4. 지원하지 않는 형식의 데이터 요청입니다. \t\n"
+              + "5. 해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
