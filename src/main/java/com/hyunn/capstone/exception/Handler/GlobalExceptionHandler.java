@@ -1,5 +1,7 @@
 package com.hyunn.capstone.exception.Handler;
 
+import static com.hyunn.capstone.exception.ErrorStatus.FILE_SIZE_EXCEED_EXCEPTION;
+
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RestControllerAdvice
@@ -37,6 +40,19 @@ public class GlobalExceptionHandler {
 
     final ErrorResponse errorResponse = ErrorResponse.create(
         ErrorStatus.METHOD_NOT_ALLOWED_EXCEPTION, "지원하지 않는 HTTP Method입니다.");
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // tomcat에서 바로 http 오류를 보내기 때문에 Global로 처리!
+  // 업로드 용량이 부족한 경우
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleMaxUploadSizeExceededException(
+      MaxUploadSizeExceededException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(FILE_SIZE_EXCEED_EXCEPTION,
+        "10MB를 넘는 파일은 업로드가 불가능합니다.");
     return ApiStandardResponse.fail(errorResponse);
   }
 

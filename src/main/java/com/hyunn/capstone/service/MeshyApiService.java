@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hyunn.capstone.dto.Request.ImageRequest;
+import com.hyunn.capstone.dto.Request.ThreeDimensionCreateRequest;
 import com.hyunn.capstone.dto.Response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
@@ -45,8 +45,8 @@ public class MeshyApiService {
   /**
    * text_to_3d
    */
-  public ThreeDimensionCreateResponse textTo3D(String apiKey, ImageRequest imageRequest,
-      String keyWord)
+  public ThreeDimensionCreateResponse textTo3D(String apiKey, String keyWord,
+      ThreeDimensionCreateRequest threeDimensionCreateRequest)
       throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -56,8 +56,9 @@ public class MeshyApiService {
     Optional<User> rootUser = Optional.ofNullable(userJpaRepository.findById(1L)
         .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    String gender = imageRequest.getGender();
-    String emotion = imageRequest.getEmotion();
+    String image = threeDimensionCreateRequest.getImage();
+    String gender = threeDimensionCreateRequest.getGender();
+    String emotion = threeDimensionCreateRequest.getEmotion();
 
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
@@ -70,12 +71,12 @@ public class MeshyApiService {
     requestBody.put("mode", "preview");
     requestBody.put("prompt", keyWord);
 
-    String artStyle = "cartoon";
+    String artStyle = "realistic";
     requestBody.put("art_style", artStyle);
 
     // 프롬포트는 추가적인 수정이 필요함.
-    String prompt = gender + ", " + emotion + ", popmart toy";
-    requestBody.put("negative_prompt", prompt);
+    String negativePrompt = gender + ", " + emotion + ", toy";
+    requestBody.put("negative_prompt", negativePrompt);
 
     // HttpEntity를 생성합니다.
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
@@ -109,8 +110,8 @@ public class MeshyApiService {
     String previewResult = responseJson.get("result").asText();
 
     // 루트 유저에게 일단 할당
-    Image newImage = Image.createImage(imageRequest.getImage(), previewResult, keyWord, emotion,
-        gender, rootUser.get());
+    Image newImage = Image.createImage(image, previewResult, keyWord, emotion, gender,
+        rootUser.get());
     imageJpaRepository.save(newImage);
     return ThreeDimensionCreateResponse.create(newImage.getImageId(), newImage.getThreeDimension(),
         newImage.getKeyWord());
@@ -166,9 +167,9 @@ public class MeshyApiService {
     String keyWord = jsonObject.get("prompt").getAsString(); // 키워드
 
     // 응답값 설정
-    String message = ""; // 퍼센트 or 3D 이미지
+    String message = null; // 퍼센트 or 3D 이미지
     Long userId = 1L;
-    String image = "";
+    String image = null;
 
     if (status.equals("IN_PROGRESS")) {
       message = "progress : " + progress + "%";
@@ -180,6 +181,7 @@ public class MeshyApiService {
       Optional<Image> existImage = Optional.ofNullable(
           imageJpaRepository.findImageByThreeDimension(preview_result)
               .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
+
       Image targetImage = existImage.get();
       targetImage.update3D(message);
       imageJpaRepository.save(targetImage);
@@ -245,6 +247,5 @@ public class MeshyApiService {
 
     return result;
   }
-
 }
 

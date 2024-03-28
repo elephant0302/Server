@@ -5,15 +5,18 @@ import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
+import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PART_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hyunn.capstone.config.AmazonS3Config;
 import com.hyunn.capstone.controller.ImageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.S3UploadException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
@@ -32,9 +35,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {ImageController.class})
+@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class})
 public class ImageExceptionHandler {
 
   // API 응답이 올바르지 않은 경우
@@ -138,6 +142,8 @@ public class ImageExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
+  ///////////////////////////////  MESHY AI API  /////////////////////////////////////////////
+
   // Meshy AI 응답 오류
   @ExceptionHandler(HttpClientErrorException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -159,6 +165,30 @@ public class ImageExceptionHandler {
     }
 
     ErrorResponse errorResponse = ErrorResponse.create(API_NOT_FOUND_EXCEPTION, errorMessage);
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  ///////////////////////////////  AWS S3  /////////////////////////////////////////////
+
+  // S3 업로드 로직에 실패한 경우
+  @ExceptionHandler(S3UploadException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleS3UploadException(S3UploadException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 멀티 파트가 부족할 경우
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleMissingServletRequestPartException(
+      MissingServletRequestPartException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(NEED_MORE_PART_EXCEPTION,
+        "멀티 파트(파일)가 부족합니다.");
     return ApiStandardResponse.fail(errorResponse);
   }
 }
