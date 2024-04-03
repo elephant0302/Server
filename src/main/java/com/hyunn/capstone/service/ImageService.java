@@ -3,25 +3,28 @@ package com.hyunn.capstone.service;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.hyunn.capstone.dto.Request.ImageToTextRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.Response.ImageToTextResponse;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.S3UploadException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,41 +42,44 @@ public class ImageService {
 
   /**
    * img_to_text (flask 서버에 이미지를 보내 키워드를 받아온다.)
-   * 아직 flaks 서버가 제대로 구현되지 않아서 정확한 반환값을 받지 못함...
    */
   public ImageToTextResponse imageToText(String apiKey, MultipartFile multipartFile,
-      ImageToTextRequest imageToTextRequest) {
+      String gender, String emotion) throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
+    // 이미지 파일인지 확인
+    if (!multipartFile.isEmpty() && !multipartFile.getContentType().startsWith("image")) {
+      throw new S3UploadException("이미지 파일만 업로드 가능합니다.");
+    }
+
     // 이미지는 jpg로 변환 후 S3에 저장
     String image = uploadFile(multipartFile);
 
-    String gender = imageToTextRequest.getGender();
-    String emotion = imageToTextRequest.getEmotion();
-
-    // API 엔드포인트 URL
-    String apiUrl = "https://ai.hyunn.site/image";
+    // flask 서버로 요청 보내기
+    String apiUri = "http://localhost:5000/image"; // 추후 수정 필요
+    RestTemplate restTemplate = new RestTemplate();
 
     // HttpHeaders 설정
     HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-    // MultiValueMap 설정
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("image", image);
+    // 요청 바디를 구성합니다.
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put("image_url", image);
 
-    // HttpEntity 설정
-    HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+    // HttpEntity를 생성합니다.
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-    // RestTemplate 생성
-    RestTemplate restTemplate = new RestTemplate();
-
-    // POST 요청 보내기
-    ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, requestEntity,
-        String.class);
+    // API 호출을 수행합니다.
+    ResponseEntity<String> response = restTemplate.exchange(
+        apiUri,
+        HttpMethod.POST,
+        requestEntity,
+        String.class
+    );
 
     // API 응답을 처리합니다.
     if (response.getStatusCode().is2xxSuccessful()) {
@@ -91,9 +97,26 @@ public class ImageService {
       throw new ApiNotFoundException("API 응답이 비어 있습니다.");
     }
 
-    List<String> keywords = Collections.singletonList(responseBody);
+    // JSON 문자열을 파싱하여 JsonNode 객체로 변환
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode responseJson = mapper.readTree(responseBody);
 
-    return ImageToTextResponse.create(image, gender, emotion, keywords);
+    List<String> keys = new ArrayList<>();
+    List<Double> values = new ArrayList<>();
+
+    // 각 항목의 키와 값을 출력
+    responseJson.fields().forEachRemaining(entry -> {
+      keys.add(entry.getKey());
+      values.add(entry.getValue().asDouble());
+    });
+
+    // 다시 객체로 만들어서 반환한다.
+    Map<String, Double> keyWordMap = new HashMap<>();
+    for (int i = 0; i < keys.size(); i++) {
+      keyWordMap.put(keys.get(i), values.get(i));
+    }
+
+    return ImageToTextResponse.create(image, gender, emotion, keyWordMap);
   }
 
   /**
