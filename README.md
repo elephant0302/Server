@@ -31,21 +31,24 @@
 │           └── capstone
 │               ├── CapstoneApplication
 │               ├── config
-│               │   ├── S3Config
+│               │   ├── AmazonS3Config
 │               │   └── SwaggerConfig
 │               ├── controller
 │               │   ├── ImageController
 │               │   ├── KakaoLoginController
 │               │   ├── MessageController
+│               │   ├── TestController
 │               │   └── UserController
 │               ├── dto
 │               │   ├── Request
 │               │   │   ├── ImageRequest
 │               │   │   ├── MessageRequest
+│               │   │   ├── ThreeDimensionCreateRequest
 │               │   │   └── UserRequest
 │               │   └── Response
 │               │   │   ├── ApiStandardResponse
 │               │   │   ├── ErrorResponse
+│               │   │   ├── ImageToTextResponse
 │               │   │   ├── MessageRespnose
 │               │   │   ├── ThreeDimesionCreateResponse
 │               │   │   ├── ThreeDimesionResponse
@@ -66,6 +69,8 @@
 │               │   │── ApiNotFoundException
 │               │   │── ErrorStatus
 │               │   │── ImageNotFoundException
+│               │   │── RootUserException
+│               │   │── S3UploadException
 │               │   └── UserNotFoundException
 │               ├── repository
 │               │   │── ImageJpaRespository
