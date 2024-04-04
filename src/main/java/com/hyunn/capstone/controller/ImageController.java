@@ -1,7 +1,6 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.Request.ImageToTextRequest;
 import com.hyunn.capstone.dto.Request.ThreeDimensionCreateRequest;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ImageToTextResponse;
@@ -20,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,7 +42,7 @@ public class ImageController {
   private final MeshyApiService meshyApiService;
   private final ImageService imageService;
 
-  @Operation(summary = "키워드 반환 (flask 서버 미완성)", description = "이미지를 flask 서버로 보내 키워드를 반환받는다.")
+  @Operation(summary = "키워드 반환 (flask 미배포로 사용불가)", description = "이미지를 flask 서버로 보내 키워드를 반환받는다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "키워드 반환"),
       @ApiResponse(responseCode = "400",
@@ -66,13 +67,20 @@ public class ImageController {
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testapieky1234")
-  @PostMapping("/image_to_text")
+  @PostMapping(value = "/image_to_text", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiStandardResponse<ImageToTextResponse>> imageToText(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Valid @RequestBody ImageToTextRequest imageToTextRequest,
-      @RequestParam("file") MultipartFile file) {
+      @Parameter(description = "성별", required = true, example = "female")
+      @RequestParam("gender") String gender,
+      @Parameter(description = "감정", required = true, example = "happy")
+      @RequestParam("emotion") String emotion,
+      @Parameter(
+          description = "multipart/form-data 형식의 10MB 이하 이미지 파일을 받습니다.",
+          content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+      )
+      @RequestPart("file") MultipartFile file) throws JsonProcessingException {
     ImageToTextResponse imageToTextResponse = imageService.imageToText(apiKey, file,
-        imageToTextRequest);
+        gender, emotion);
     return ResponseEntity.ok(ApiStandardResponse.success(imageToTextResponse));
   }
 
