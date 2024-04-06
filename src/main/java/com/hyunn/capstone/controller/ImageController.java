@@ -42,7 +42,7 @@ public class ImageController {
   private final MeshyApiService meshyApiService;
   private final ImageService imageService;
 
-  @Operation(summary = "키워드 반환 (flask 미배포로 사용불가)", description = "이미지를 flask 서버로 보내 키워드를 반환받는다.")
+  @Operation(summary = "키워드 반환", description = "이미지를 flask 서버로 보내 키워드를 반환받는다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "키워드 반환"),
       @ApiResponse(responseCode = "400",

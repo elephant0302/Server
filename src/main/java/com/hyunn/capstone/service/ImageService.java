@@ -38,6 +38,9 @@ public class ImageService {
   @Value("${cloud.aws.s3.bucket}")
   private String bucketName;
 
+  @Value("${flask.apiUri}")
+  private String apiUri;
+
   private final AmazonS3Client amazonS3Client;
 
   /**
@@ -59,7 +62,6 @@ public class ImageService {
     String image = uploadFile(multipartFile);
 
     // flask 서버로 요청 보내기
-    String apiUri = "http://localhost:5000/image"; // 추후 수정 필요
     RestTemplate restTemplate = new RestTemplate();
 
     // HttpHeaders 설정
