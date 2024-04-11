@@ -15,6 +15,7 @@ import com.hyunn.capstone.controller.ImageController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.FileNotAllowedException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.S3UploadException;
 import jakarta.validation.ConstraintViolation;
@@ -55,6 +56,16 @@ public class ImageExceptionHandler {
   @ExceptionHandler(ImageNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 파일 형식이 유효하지 않은 경우
+  @ExceptionHandler(FileNotAllowedException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleFileNotAllowedException(FileNotAllowedException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
