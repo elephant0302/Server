@@ -57,7 +57,7 @@ public class UserController {
                   + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/address")
   public ResponseEntity<ApiStandardResponse<String>> updateAddress(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
@@ -92,7 +92,7 @@ public class UserController {
                   + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/image")
   public ResponseEntity<ApiStandardResponse<String>> setImage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
@@ -127,7 +127,7 @@ public class UserController {
                   + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @DeleteMapping()
   public ResponseEntity<ApiStandardResponse<String>> deleteUser(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
@@ -159,7 +159,7 @@ public class UserController {
                   + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/images")
   public ResponseEntity<ApiStandardResponse<List<ThreeDimensionResponse>>> findImagesByUser(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,

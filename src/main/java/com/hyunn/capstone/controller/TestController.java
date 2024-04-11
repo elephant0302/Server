@@ -29,7 +29,7 @@ public class TestController {
 
   @Operation(summary = "GET METHOD TEST", description = "GET 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @GetMapping()
   public ResponseEntity<ApiStandardResponse<String>> getTestMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey) {
@@ -42,7 +42,7 @@ public class TestController {
 
   @Operation(summary = "POST METHOD TEST", description = "POST 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping ()
   public ResponseEntity<ApiStandardResponse<String>> getPostMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey) {
@@ -55,7 +55,7 @@ public class TestController {
 
   @Operation(summary = "PATCH METHOD TEST", description = "PATCH 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @PatchMapping()
   public ResponseEntity<ApiStandardResponse<String>> getPatchMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey) {
@@ -68,7 +68,7 @@ public class TestController {
 
   @Operation(summary = "DELETE METHOD TEST", description = "DELETE 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapieky1234")
+      in = ParameterIn.HEADER, example = "testApiKey2024")
   @DeleteMapping()
   public ResponseEntity<ApiStandardResponse<String>> getDeleteMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey) {
