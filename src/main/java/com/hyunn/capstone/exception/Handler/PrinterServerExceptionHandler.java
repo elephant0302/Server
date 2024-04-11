@@ -1,6 +1,5 @@
 package com.hyunn.capstone.exception.Handler;
 
-import static com.hyunn.capstone.exception.ErrorStatus.API_NOT_FOUND_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
@@ -8,19 +7,15 @@ import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PART_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hyunn.capstone.config.AmazonS3Config;
-import com.hyunn.capstone.controller.ImageController;
+import com.hyunn.capstone.controller.PrinterController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.FileNotAllowedException;
-import com.hyunn.capstone.exception.ImageNotFoundException;
-import com.hyunn.capstone.exception.S3UploadException;
+import com.hyunn.capstone.exception.RootUserException;
+import com.hyunn.capstone.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +29,22 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class})
-public class ImageExceptionHandler {
+@RestControllerAdvice(assignableTypes = {PrinterController.class})
+public class PrinterServerExceptionHandler {
+
+  // 루트 계정에 허가되지 않은 조작을 하는 경우
+  @ExceptionHandler(RootUserException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiStandardResponse<ErrorResponse> handleRootUserException(RootUserException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
 
   // API 응답이 올바르지 않은 경우
   @ExceptionHandler(ApiNotFoundException.class)
@@ -52,10 +56,10 @@ public class ImageExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // 이미지를 찾을 수 없는 경우
-  @ExceptionHandler(ImageNotFoundException.class)
+  // 유저를 찾을 수 없는 경우
+  @ExceptionHandler(UserNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
+  public ApiStandardResponse<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
@@ -65,7 +69,8 @@ public class ImageExceptionHandler {
   // 파일 형식이 유효하지 않은 경우
   @ExceptionHandler(FileNotAllowedException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleFileNotAllowedException(FileNotAllowedException e) {
+  public ApiStandardResponse<ErrorResponse> handleFileNotAllowedException(
+      FileNotAllowedException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
@@ -150,44 +155,6 @@ public class ImageExceptionHandler {
       HttpMediaTypeNotSupportedException e) {
     ErrorResponse errorResponse = ErrorResponse.create(MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION,
         "지원하지 않는 형식의 데이터 요청입니다.");
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  ///////////////////////////////  MESHY AI API  /////////////////////////////////////////////
-
-  // Meshy AI 응답 오류
-  @ExceptionHandler(HttpClientErrorException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleHttpClientErrorException(
-      HttpClientErrorException e) {
-    String responseBody = e.getResponseBodyAsString();
-    String errorMessage = "응답 형식을 파악할 수 없습니다. 관리자에게 문의해주세요.";
-
-    if (responseBody != null && !responseBody.isEmpty()) {
-      try {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
-        if (jsonNode.has("message")) {
-          errorMessage = jsonNode.get("message").asText();
-        }
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      }
-    }
-
-    ErrorResponse errorResponse = ErrorResponse.create(API_NOT_FOUND_EXCEPTION, errorMessage);
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  ///////////////////////////////  AWS S3  /////////////////////////////////////////////
-
-  // S3 업로드 로직에 실패한 경우
-  @ExceptionHandler(S3UploadException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleS3UploadException(S3UploadException e) {
-    log.error("", e);
-
-    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
     return ApiStandardResponse.fail(errorResponse);
   }
 

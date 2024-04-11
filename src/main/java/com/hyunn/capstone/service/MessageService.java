@@ -64,13 +64,12 @@ public class MessageService {
   private String sendmApiKey;
 
   private final UserJpaRepository userJpaRepository;
-  // 빨간 이유는 autowired 문제 (실행하는데 일단 문제는 없음!)
-  private final JavaMailSender javaMailSender;
+  private final JavaMailSender javaMailSender; // 빨간 이유는 autowired 문제 (실행하는데 일단 문제는 없음!)
 
   /**
    * 이메일 발송
    */
-  public String sendSimpleMail(String email, String nickName) {
+  public String sendSimpleMail(String email, String nickName, String process) {
     SimpleMailMessage message = new SimpleMailMessage();
 
     // 발신자
@@ -80,12 +79,12 @@ public class MessageService {
     message.setTo(email);
 
     // 제목
-    String title = "[JRGB] " + nickName + "님 주문하신 상품의 출력이 완료되었습니다.";
+    String title = "[JRGB] " + nickName + "님 주문하신 상품의 " + process + " 완료되었습니다.";
     message.setSubject(title);
 
     // 내용
     String text = "안녕하세요. JRGB입니다."
-        + "\n" + nickName + "님이 주문하신 상품의 출력이 완료되었습니다. "
+        + "\n" + nickName + "님이 주문하신 상품의 " + process + " 완료되었습니다. "
         + "\n더 많은 정보를 원하시면 아래 링크를 이용해주세요."
         + "\n" + kakaoTalkRedirectUri;
     message.setText(text);
@@ -100,13 +99,13 @@ public class MessageService {
   /**
    * 문자 메세지 발송 -> HttpURLConnection 사용
    */
-  public String sendSMS(String phone, String nickName) throws IOException {
+  public String sendSMS(String phone, String nickName, String process) throws IOException {
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("callerNo", senderNum);
 
     // 메세지
-    String text = "[JRGB] " + nickName + "님 주문하신 상품의 출력이 완료되었습니다."
+    String text = "[JRGB] " + nickName + "님 주문하신 상품의 " + process + " 완료되었습니다."
         + "\n홈페이지에 방문하셔서 확인해주세요.";
     requestBody.put("message", text);
 
@@ -176,7 +175,7 @@ public class MessageService {
   }
 
   /**
-   * 각종 메세지 발송에 대한 응답 취합
+   * 각종 메세지 발송에 대한 응답 취합 -> 결제 완료 시
    */
   public MessageResponse sendMessage(String apiKey, MessageRequest messageRequest)
       throws IOException {
@@ -197,8 +196,36 @@ public class MessageService {
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
     String nickName = existUser.get().getNickName();
 
-    String responseByEmail = sendSimpleMail(email, nickName);
-    String responseBySMS = sendSMS(phone, nickName);
+    String responseByEmail = sendSimpleMail(email, nickName, "결제가");
+    String responseBySMS = sendSMS(phone, nickName, "결제가");
+
+    return MessageResponse.create(responseByEmail, responseBySMS);
+  }
+
+  /**
+   * 각종 메세지 발송에 대한 응답 취합 -> 완료 요청 시
+   */
+  public MessageResponse sendMessage(String apiKey, MessageRequest messageRequest, String process)
+      throws IOException {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
+    String phone = messageRequest.getPhone();
+    String email = messageRequest.getEmail();
+
+    if (phone.equals("01012345678") && email.equals("root@naver.com")) {
+      throw new RootUserException("해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.");
+    }
+
+    Optional<User> existUser = Optional.ofNullable(
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    String nickName = existUser.get().getNickName();
+
+    String responseByEmail = sendSimpleMail(email, nickName, process);
+    String responseBySMS = sendSMS(phone, nickName, process);
 
     return MessageResponse.create(responseByEmail, responseBySMS);
   }

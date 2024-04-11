@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.Response.ImageToTextResponse;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.FileNotAllowedException;
 import com.hyunn.capstone.exception.S3UploadException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +56,7 @@ public class ImageService {
 
     // 이미지 파일인지 확인
     if (!multipartFile.isEmpty() && !multipartFile.getContentType().startsWith("image")) {
-      throw new S3UploadException("이미지 파일만 업로드 가능합니다.");
+      throw new FileNotAllowedException("이미지 파일만 업로드 가능합니다.");
     }
 
     // 이미지는 jpg로 변환 후 S3에 저장
