@@ -89,7 +89,7 @@ public class TestController {
   }
 
   @Operation(summary = "User DB 조회",
-      description = "실제 유저 정보로써 유저 등록 후 자신의 정보로 테스트해주세요!"
+      description = "실제 유저 정보로써 테스트 시에는 유저 등록 후 자신의 정보로 테스트해주세요!"
           + "\nhttps://kauth.kakao.com/oauth/authorize?response_type=code&client_id=681c7dd24caab6868c553a07b27422ed&redirect_uri=https://capstone.hyunn.site/api/login/oauth2/code/kakao")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
