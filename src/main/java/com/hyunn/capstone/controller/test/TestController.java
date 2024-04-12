@@ -52,7 +52,7 @@ public class TestController {
   @Operation(summary = "POST METHOD TEST", description = "POST 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
-  @PostMapping ()
+  @PostMapping()
   public ResponseEntity<ApiStandardResponse<String>> getPostMessage(
       @RequestHeader(value = "x-api-key", required = false) String apiKey) {
     // API KEY 유효성 검사
@@ -88,7 +88,9 @@ public class TestController {
     return ResponseEntity.ok(ApiStandardResponse.success("(TEST) DELETE 요청을 받았습니다."));
   }
 
-  @Operation(summary = "User DB", description = "User DB 확인 API 입니다.")
+  @Operation(summary = "User DB 조회",
+      description = "실제 유저 정보로써 유저 등록 후 자신의 정보로 테스트해주세요!"
+          + "\nhttps://kauth.kakao.com/oauth/authorize?response_type=code&client_id=681c7dd24caab6868c553a07b27422ed&redirect_uri=https://capstone.hyunn.site/api/login/oauth2/code/kakao")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
   @GetMapping("/users")
@@ -102,7 +104,7 @@ public class TestController {
     return ResponseEntity.ok(ApiStandardResponse.success(userList));
   }
 
-  @Operation(summary = "Image DB", description = "Image DB 확인 API 입니다.")
+  @Operation(summary = "Image DB 조회", description = "Image DB 확인 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
   @GetMapping("/images")
