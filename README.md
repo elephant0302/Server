@@ -34,10 +34,13 @@
 │               │   ├── AmazonS3Config
 │               │   └── SwaggerConfig
 │               ├── controller
+│               │   ├── test
+│               │   │   ├── ImageDto
+│               │   │   └── TestController
 │               │   ├── ImageController
 │               │   ├── KakaoLoginController
 │               │   ├── MessageController
-│               │   ├── TestController
+│               │   ├── PrinterController
 │               │   └── UserController
 │               ├── dto
 │               │   ├── Request
@@ -64,6 +67,7 @@
 │               │   │   ├── ImageExceptionHandler
 │               │   │   ├── KakaoLoginExceptionHandler
 │               │   │   ├── MessageExceptionHandler
+│               │   │   ├── PrinterServerExceptionHandler
 │               │   │   └── UserExceptionHandler
 │               │   │── ApiKeyNotValidException
 │               │   │── ApiNotFoundException
@@ -81,6 +85,7 @@
 │                   ├── KakaoLoginService
 │                   ├── MeshyApiService
 │                   ├── MessageService
+│                   ├── PrinterService
 │                   └── UserService
 └── test
 ```
