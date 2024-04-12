@@ -72,6 +72,7 @@
 │               │   │── ApiKeyNotValidException
 │               │   │── ApiNotFoundException
 │               │   │── ErrorStatus
+│               │   │── FileNotAllowedException
 │               │   │── ImageNotFoundException
 │               │   │── RootUserException
 │               │   │── S3UploadException
