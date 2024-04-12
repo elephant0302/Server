@@ -4,14 +4,13 @@ import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
-import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PART_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
 import com.hyunn.capstone.controller.PrinterController;
 import com.hyunn.capstone.dto.Response.ApiStandardResponse;
 import com.hyunn.capstone.dto.Response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-import com.hyunn.capstone.exception.FileNotAllowedException;
+import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
 @RestControllerAdvice(assignableTypes = {PrinterController.class})
@@ -66,11 +64,10 @@ public class PrinterServerExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // 파일 형식이 유효하지 않은 경우
-  @ExceptionHandler(FileNotAllowedException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleFileNotAllowedException(
-      FileNotAllowedException e) {
+  // 이미지를 찾을 수 없는 경우
+  @ExceptionHandler(ImageNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
@@ -155,18 +152,6 @@ public class PrinterServerExceptionHandler {
       HttpMediaTypeNotSupportedException e) {
     ErrorResponse errorResponse = ErrorResponse.create(MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION,
         "지원하지 않는 형식의 데이터 요청입니다.");
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  // 멀티 파트가 부족할 경우
-  @ExceptionHandler(MissingServletRequestPartException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiStandardResponse<ErrorResponse> handleMissingServletRequestPartException(
-      MissingServletRequestPartException e) {
-    log.error("", e);
-
-    final ErrorResponse errorResponse = ErrorResponse.create(NEED_MORE_PART_EXCEPTION,
-        "멀티 파트(파일)가 부족합니다.");
     return ApiStandardResponse.fail(errorResponse);
   }
 }
