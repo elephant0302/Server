@@ -1,9 +1,9 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.Request.MessageRequest;
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.MessageResponse;
+import com.hyunn.capstone.dto.request.MessageRequest;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.MessageResponse;
 import com.hyunn.capstone.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

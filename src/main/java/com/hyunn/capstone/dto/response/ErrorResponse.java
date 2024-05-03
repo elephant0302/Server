@@ -1,4 +1,4 @@
-package com.hyunn.capstone.dto.Response;
+package com.hyunn.capstone.dto.response;
 
 import com.hyunn.capstone.exception.ErrorStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

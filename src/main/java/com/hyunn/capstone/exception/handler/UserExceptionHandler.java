@@ -1,4 +1,4 @@
-package com.hyunn.capstone.exception.Handler;
+package com.hyunn.capstone.exception.handler;
 
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
@@ -6,10 +6,9 @@ import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
-import com.hyunn.capstone.controller.PrinterController;
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ErrorResponse;
-import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.controller.UserController;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
@@ -31,23 +30,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {PrinterController.class})
-public class PrinterServerExceptionHandler {
+@RestControllerAdvice(assignableTypes = {UserController.class})
+public class UserExceptionHandler {
 
   // 루트 계정에 허가되지 않은 조작을 하는 경우
   @ExceptionHandler(RootUserException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiStandardResponse<ErrorResponse> handleRootUserException(RootUserException e) {
-    log.error("", e);
-
-    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  // API 응답이 올바르지 않은 경우
-  @ExceptionHandler(ApiNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleApiNotFoundException(ApiNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());

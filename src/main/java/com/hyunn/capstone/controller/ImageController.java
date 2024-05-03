@@ -1,11 +1,11 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.Request.ThreeDimensionCreateRequest;
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ImageToTextResponse;
-import com.hyunn.capstone.dto.Response.ThreeDimensionCreateResponse;
-import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
+import com.hyunn.capstone.dto.request.ThreeDimensionCreateRequest;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ImageToTextResponse;
+import com.hyunn.capstone.dto.response.ThreeDimensionCreateResponse;
+import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.service.ImageService;
 import com.hyunn.capstone.service.MeshyApiService;
 import io.swagger.v3.oas.annotations.Operation;

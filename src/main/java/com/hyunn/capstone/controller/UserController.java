@@ -1,8 +1,8 @@
 package com.hyunn.capstone.controller;
 
-import com.hyunn.capstone.dto.Request.UserRequest;
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
+import com.hyunn.capstone.dto.request.UserRequest;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

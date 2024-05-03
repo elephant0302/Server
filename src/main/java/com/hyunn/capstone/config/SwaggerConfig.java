@@ -1,7 +1,7 @@
 package com.hyunn.capstone.config;
 
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ErrorResponse;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ErrorStatus;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;

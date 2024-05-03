@@ -1,7 +1,7 @@
 package com.hyunn.capstone.controller;
 
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.UserResponse;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.UserResponse;
 import com.hyunn.capstone.service.KakaoLoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

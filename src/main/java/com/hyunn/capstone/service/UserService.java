@@ -1,7 +1,7 @@
 package com.hyunn.capstone.service;
 
-import com.hyunn.capstone.dto.Request.UserRequest;
-import com.hyunn.capstone.dto.Response.ThreeDimensionResponse;
+import com.hyunn.capstone.dto.request.UserRequest;
+import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
