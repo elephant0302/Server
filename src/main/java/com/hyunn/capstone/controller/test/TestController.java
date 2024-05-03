@@ -1,6 +1,6 @@
 package com.hyunn.capstone.controller.test;
 
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;

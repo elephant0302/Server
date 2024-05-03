@@ -1,19 +1,17 @@
-package com.hyunn.capstone.exception.Handler;
+package com.hyunn.capstone.exception.handler;
 
 import static com.hyunn.capstone.exception.ErrorStatus.FILE_SIZE_EXCEED_EXCEPTION;
 
-import com.hyunn.capstone.dto.Response.ApiStandardResponse;
-import com.hyunn.capstone.dto.Response.ErrorResponse;
+import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ErrorStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j

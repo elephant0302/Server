@@ -3,7 +3,7 @@ package com.hyunn.capstone.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hyunn.capstone.dto.Response.UserResponse;
+import com.hyunn.capstone.dto.response.UserResponse;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;

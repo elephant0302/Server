@@ -1,4 +1,4 @@
-package com.hyunn.capstone.dto.Request;
+package com.hyunn.capstone.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
-public class MessageRequest {
+public class UserRequest {
 
   @Schema(type = "String", description = "핸드폰 번호", example = "01012345678")
   @NotBlank(message = "핸드폰 번호를 입력해주세요.")
@@ -19,13 +19,13 @@ public class MessageRequest {
   @Email(message = "이메일 형식을 지켜주세요.")
   private String email;
 
-  public MessageRequest(String phone, String email) {
+
+  public UserRequest(String phone, String email) {
     this.phone = phone;
     this.email = email;
   }
 
-  public static MessageRequest create(String phone, String email) {
-    return new MessageRequest(phone, email);
+  public static UserRequest create(String phone, String email) {
+    return new UserRequest(phone, email);
   }
-
 }
