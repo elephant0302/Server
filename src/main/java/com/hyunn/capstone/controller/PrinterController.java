@@ -47,7 +47,8 @@ public class PrinterController {
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 유저를 찾지 못했습니다. \t\n"
-              + "3. 이미지를 찾지 못했습니다.",
+              + "3. 이미지를 찾지 못했습니다. \t\n"
+              + "4. 결제 정보를 찾지 못했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -79,7 +80,7 @@ public class PrinterController {
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 유저를 찾지 못했습니다.",
+              + "2. 결제 정보를 찾지 못했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -90,9 +91,9 @@ public class PrinterController {
   @PostMapping("/commit")
   public ResponseEntity<ApiStandardResponse<MessageResponse>> commit(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "핸드폰 번호", required = true, example = "01012345678")
-      @RequestParam("phone") String phone) throws IOException {
-    MessageResponse response = printerService.commit(apiKey, phone);
+      @Parameter(description = "결제 ID", required = true, example = "1")
+      @RequestParam("payment_id") Long paymentId) throws IOException {
+    MessageResponse response = printerService.commit(apiKey, paymentId);
     return ResponseEntity.ok(ApiStandardResponse.success(response));
   }
 
