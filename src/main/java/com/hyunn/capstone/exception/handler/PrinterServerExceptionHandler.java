@@ -11,6 +11,7 @@ import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -68,6 +69,16 @@ public class PrinterServerExceptionHandler {
   @ExceptionHandler(ImageNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
+    log.error("", e);
+
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 결제 정보를 찾을 수 없는 경우
+  @ExceptionHandler(PaymentNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handlePaymentNotFoundException(PaymentNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
