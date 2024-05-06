@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,10 +46,15 @@ public class Image extends BaseEntity {
   @Column(name = "gender")
   private String gender;
 
-  // 조인
+  // 어느 유저의 이미지 정보인가
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  // 결제 정보와 1대1
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "payment_id")
+  private Payment payment;
 
   private Image(String image, String threeDimension, String keyWord, String emotion,
       String gender, User user) {
@@ -71,6 +77,10 @@ public class Image extends BaseEntity {
 
   public void update3D(String threeDimension) {
     this.threeDimension = threeDimension;
+  }
+
+  public void connectPayment(Payment payment) {
+    this.payment = payment;
   }
 
 }
