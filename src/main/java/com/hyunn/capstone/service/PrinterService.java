@@ -147,6 +147,11 @@ public class PrinterService {
       throw new RootUserException("해당 유저는 루트 유저로써 해당 기능을 수행할 수 없습니다.");
     }
 
+    // DB에 반영
+    Payment existPayment = payment.get();
+    existPayment.updateShipping("배송 시작");
+    paymentJpaRepository.save(existPayment);
+
     // 출력 완료에 대한 메시지 보내기
     MessageResponse messageResponse = messageService.sendMessage(apiKey, MessageRequest.create(phone, email));
 

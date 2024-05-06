@@ -50,12 +50,16 @@ public class Payment extends BaseEntity {
   private Payment(Integer price, String address, String Shipping, Image image) {
     this.price = price;
     this.address = address;
-    this.Shipping = Shipping;
+    this.Shipping = "출력 대기";
     this.image = image;
   }
 
   public static Payment createPayment(Integer price, String address, String Shipping, Image image) {
     return new Payment(price, address, Shipping, image);
+  }
+
+  public void updateShipping(String Shipping) {
+    this.Shipping = Shipping;
   }
 
 }
