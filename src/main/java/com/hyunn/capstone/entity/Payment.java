@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,31 +26,36 @@ public class Payment extends BaseEntity {
   @Column(name = "payment_id")
   private Long paymentId;
 
-  // 가격
+  // 상품명
+  @Column(name = "product_name")
+  private String productName;
+
+  // 상품 가격
   @Column(name = "price")
   private Integer price;
 
-  // 주소
+  // 배송지 -> 유저 주소랑 다를 수 있음
   @Column(name = "address")
   private String address;
 
-  // 배송 회사 링크
-  @Column(name = "link")
-  private String link;
+  // 배송 정보
+  @Column(name = "Shipping")
+  private String Shipping;
 
-  // 조인
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
+  // 이미지와 1대1
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "image_id")
+  private Image image;
 
-  private Payment(Integer price, String address, User user) {
+  private Payment(Integer price, String address, String Shipping, Image image) {
     this.price = price;
     this.address = address;
-    this.user = user;
+    this.Shipping = Shipping;
+    this.image = image;
   }
 
-  public static Payment createPayment(Integer price, String address, User user) {
-    return new Payment(price, address, user);
+  public static Payment createPayment(Integer price, String address, String Shipping, Image image) {
+    return new Payment(price, address, Shipping, image);
   }
 
 }
