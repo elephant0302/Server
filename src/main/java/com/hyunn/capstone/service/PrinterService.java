@@ -6,13 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.request.MessageRequest;
 import com.hyunn.capstone.dto.response.MessageResponse;
 import com.hyunn.capstone.entity.Image;
+import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
+import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,6 +43,7 @@ public class PrinterService {
 
   private final UserJpaRepository userJpaRepository;
   private final ImageJpaRepository imageJpaRepository;
+  private final PaymentJpaRepository paymentJpaRepository;
   private final MessageService messageService;
 
   /**
@@ -51,23 +55,24 @@ public class PrinterService {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
+    // 이미지 검사
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(imageId)
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
 
     String obj = image.get().getThreeDimension();
     Long userId = image.get().getUser().getUserId();
+    Long paymentId = image.get().getPayment().getPaymentId();
+
+    // 결제 정보 검사
+    if (!paymentJpaRepository.existsById(paymentId)) {
+      throw new PaymentNotFoundException("결제 정보를 가져오지 못했습니다.");
+    }
 
     // 루트 사용자 제한
     if (userId == 1) {
       throw new RootUserException("해당 유저는 루트 유저로써 해당 기능을 수행할 수 없습니다.");
     }
-
-    Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-
-    String phone = user.get().getPhone();
 
     // Raspberry-Pi 요청 보내기
     RestTemplate restTemplate = new RestTemplate();
@@ -79,7 +84,7 @@ public class PrinterService {
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("obj_url", obj);
-    requestBody.put("phone", phone);
+    requestBody.put("payment_id", paymentId);
 
     // HttpEntity를 생성합니다.
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
@@ -112,23 +117,29 @@ public class PrinterService {
     JsonNode responseJson = mapper.readTree(responseBody);
     String message = responseJson.get("message").asText();
 
+    if (!message.equals("success")) {
+      throw new ApiNotFoundException("3D 프린터 서버에서 예상치 못한 오류가 발생했습니다.");
+    }
+
     return new String(message);
   }
 
   /**
    * 3D 프린터 서버에서 완료 요청
    */
-  public MessageResponse commit(String apiKey, String phone) throws IOException {
+  public MessageResponse commit(String apiKey, Long paymentId) throws IOException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    // 유저 검색
-    Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(phone)
-            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-    User existUser = user.get();
+    // 결제 정보 검사
+    Optional<Payment> payment = Optional.ofNullable(
+        paymentJpaRepository.findById(paymentId)
+            .orElseThrow(() -> new PaymentNotFoundException("결제 정보를 가져오지 못했습니다.")));
+
+    User existUser = payment.get().getImage().getUser();
+    String phone = existUser.getPhone();
     String email = existUser.getEmail();
 
     // 루트 사용자 제한
@@ -136,9 +147,13 @@ public class PrinterService {
       throw new RootUserException("해당 유저는 루트 유저로써 해당 기능을 수행할 수 없습니다.");
     }
 
+    // DB에 반영
+    Payment existPayment = payment.get();
+    existPayment.updateShipping("배송 시작");
+    paymentJpaRepository.save(existPayment);
+
     // 출력 완료에 대한 메시지 보내기
-    MessageResponse messageResponse = messageService.sendMessage(apiKey,
-        MessageRequest.create(phone, email), "출력이");
+    MessageResponse messageResponse = messageService.sendMessage(apiKey, MessageRequest.create(phone, email));
 
     return messageResponse;
   }
