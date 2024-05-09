@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -47,15 +46,17 @@ public class Payment extends BaseEntity {
   @JoinColumn(name = "image_id")
   private Image image;
 
-  private Payment(Integer price, String address, String Shipping, Image image) {
+  private Payment(String productName, Integer price, String address, String Shipping, Image image) {
+    this.productName = productName;
     this.price = price;
     this.address = address;
-    this.Shipping = "출력 대기";
+    this.Shipping = Shipping;
     this.image = image;
   }
 
-  public static Payment createPayment(Integer price, String address, String Shipping, Image image) {
-    return new Payment(price, address, Shipping, image);
+  public static Payment createPayment(String productName, Integer price, String address,
+      String Shipping, Image image) {
+    return new Payment(productName, price, address, Shipping, image);
   }
 
   public void updateShipping(String Shipping) {
