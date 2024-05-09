@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
+import com.hyunn.capstone.entity.BaseEntity;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
@@ -66,6 +67,8 @@ public class KakaoPayService {
 
   private KakaoPayReadyResponse kakaoPayReadyResponse = KakaoPayReadyResponse.create();
 
+  private KakaoPayApproveResponse kakaoPayApproveResponse = KakaoPayApproveResponse.create();
+
   private final ImageJpaRepository imageJpaRepository;
 
   private final UserJpaRepository userJpaRepository;
@@ -75,7 +78,7 @@ public class KakaoPayService {
   /**
    * 카카오페이 결제준비 단계
    */
-  public KakaoPayReadyResponse getReady(Long imageId, String phone, String apiKey,
+  public KakaoPayReadyResponse getReady(Long imageId, String apiKey,
       KakaoPayReadyRequest kakaoPayReadyRequest)
       throws JsonProcessingException {
     // API KEY 유효성 검사
@@ -88,12 +91,13 @@ public class KakaoPayService {
             .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
     Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(phone)
+        userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     if (image.get().getUser().getUserId() != user.get().getUserId()) {
       throw new UserNotFoundException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
     }
+    // 새로 만들기
 
     String partner_user_id = kakaoPayReadyRequest.getPartner_user_id();
     // 요청 바디를 구성합니다.
@@ -156,7 +160,6 @@ public class KakaoPayService {
     return kakaoPayReadyResponse;
   }
 
-
   /**
    * 카카오페이 결제승인 단계
    */
@@ -205,17 +208,7 @@ public class KakaoPayService {
     amount.setTotal(responseJson.get("amount").get("total").asInt());
 
     // KakaoPayApproveResponse 생성을 위한 나머지 데이터 추출
-    String aid = responseJson.get("aid").asText();
-    String payment_method_type = responseJson.get("payment_method_type").asText();
     String item_name = responseJson.get("item_name").asText();
-    String item_code = responseJson.get("item_code").asText();
-    Integer quantity = responseJson.get("quantity").asInt();
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-    LocalDateTime created_at = LocalDateTime.parse(responseJson.get("created_at").asText(),
-        formatter);
-    LocalDateTime approved_at = LocalDateTime.parse(responseJson.get("approved_at").asText(),
-        formatter);
 
     String Partner_user_id = kakaoPayReadyResponse.getPartner_user_id();
 
@@ -235,11 +228,16 @@ public class KakaoPayService {
     existImage.connectPayment(payment);
     imageJpaRepository.save(existImage);
 
-    return KakaoPayApproveResponse.create(
-        aid, kakaoPayReadyResponse.getTid(), cid, payment_method_type, Partner_user_id,
-        amount, item_name, item_code, quantity,
-        created_at, approved_at
-    );
-  }
+    kakaoPayApproveResponse.setProductName(item_name);
+    KakaoPayApproveResponse.Amount amountDetail = new KakaoPayApproveResponse.Amount();
+    amountDetail.setTotal(amount.getTotal().intValue());
+    kakaoPayApproveResponse.setAddress(payment.getAddress());
+    kakaoPayApproveResponse.setShippingStatus("결제 완료");
+    kakaoPayApproveResponse.setImageId(kakaoPayReadyResponse.getImageId());
+    kakaoPayApproveResponse.setUserNickname(user.get().getNickName());
+    kakaoPayApproveResponse.setUserEmail(user.get().getEmail());
+    kakaoPayApproveResponse.setApprovedAt(payment.getDate());
 
+    return kakaoPayApproveResponse;
+  }
 }

@@ -12,22 +12,10 @@ import java.time.LocalDateTime;
 @ToString
 public class KakaoPayApproveResponse {
 
-  @Schema(type = "String", description = "요청 고유 번호 - 승인/취소가 구분된 결제번호", example = "A5678901234567890123")
-  private String aid;
+  @Schema(description = "상품명")
+  private String productName;
 
-  @Schema(type = "String", description = "결제 고유 번호 - 승인/취소가 동일한 결제번호", example = "T1234567890123456789")
-  private String tid;
-
-  @Schema(type = "String", description = "가맹점 코드", example = "TC0ONETIME")
-  private String cid;
-
-  @Schema(type = "String", description = "가맹점 회원 id, 최대 100자", example = "partner_user_id")
-  private String partner_user_id;
-
-  @Schema(type = "String", description = "결제 수단, CARD 또는 MONEY 중 하나", example = "MONEY")
-  private String payment_method_type;
-
-  @Schema(type = "Amount", description = "결제 금액 정보", example = "{\n" +
+  @Schema(type = "Amount", description = "결제 가격", example = "{\n" +
       "    \"total\": 2200,\n" +
       "  },")
   private Amount amount;
@@ -40,51 +28,41 @@ public class KakaoPayApproveResponse {
     private Integer total;        // 전체 결제 금액
   }
 
-  @Schema(type = "String", description = "상품 이름, 최대 100자", example = "초코파이")
-  private String item_name;
+  @Schema(description = "배송지 주소")
+  private String address;
 
-  @Schema(type = "String", description = "상품 코드, 최대 100자", example = "123421423")
-  private String item_code;
+  @Schema(description = "배송 정보")
+  private String shippingStatus;
 
-  @Schema(type = "Integer", description = "상품 수량", example = "1")
-  private int quantity;
+  @Schema(type = "Long", description = "이미지 id", example = "1")
+  private Long imageId;
 
-  @Schema(type = "Datetime", description = "결제 준비 요청 시각", example = "2023-07-15T21:18:22")
-  private LocalDateTime created_at;
+  @Schema(description = "유저 닉네임")
+  private String userNickname;
 
-  @Schema(type = "Datetime", description = "결제 승인 요청 시각", example = "2023-07-15T21:18:22")
-  private LocalDateTime approved_at;
+  @Schema(description = "유저 이메일")
+  private String userEmail;
 
+  @Schema(description = "승인 시간")
+  private LocalDateTime approvedAt;
 
-  public KakaoPayApproveResponse(String aid, String tid, String cid, String partner_user_id,
-      String payment_method_type,
-      Amount amount, String item_name, String item_code, int quantity,
-      LocalDateTime created_at, LocalDateTime approved_at) {
-    this.aid = aid;
-    this.tid = tid;
-    this.cid = cid;
-    this.partner_user_id = partner_user_id;
-    this.payment_method_type = payment_method_type;
+  public KakaoPayApproveResponse(String productName, Amount amount, String address,
+      String shippingStatus, Long imageId, String userNickname, String userEmail,
+      LocalDateTime approvedAt) {
+    this.productName = productName;
     this.amount = amount;
-    this.item_name = item_name;
-    this.item_code = item_code;
-    this.quantity = quantity;
-    this.created_at = created_at;
-    this.approved_at = approved_at;
+    this.address = address;
+    this.shippingStatus = shippingStatus;
+    this.imageId = imageId;
+    this.userNickname = userNickname;
+    this.userEmail = userEmail;
+    this.approvedAt = approvedAt;
   }
 
-  public static KakaoPayApproveResponse create(String aid,
-      String tid,
-      String cid,
-      String partner_user_id,
-      String payment_method_type,
-      Amount amount,
-      String item_name,
-      String item_code,
-      Integer quantity,
-      LocalDateTime created_at,
-      LocalDateTime approved_at) {
-    return new KakaoPayApproveResponse(aid, tid, cid, partner_user_id, payment_method_type, amount,
-        item_name, item_code, quantity, created_at, approved_at);
+  public static KakaoPayApproveResponse create() {
+    return new KakaoPayApproveResponse("null", null, "null", "null", null, "null", "null", null);
   }
 }
+
+
+

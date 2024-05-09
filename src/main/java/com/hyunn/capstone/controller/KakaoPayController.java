@@ -65,12 +65,10 @@ public class KakaoPayController {
   public ResponseEntity<ApiStandardResponse<KakaoPayReadyResponse>> getReady(
       @Parameter(description = "이미지 ID", required = true, example = "1 (Long)")
       @RequestParam("image_id") Long imageId,
-      @Parameter(description = "전화번호", required = true, example = "01012345678")
-      @RequestParam("phone") String phone,
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
       @Valid @RequestBody KakaoPayReadyRequest kakaoPayReadyRequest)
       throws JsonProcessingException {
-    KakaoPayReadyResponse kakaoPayReadyResponse = kakaoPayService.getReady(imageId, phone, apiKey,
+    KakaoPayReadyResponse kakaoPayReadyResponse = kakaoPayService.getReady(imageId, apiKey,
         kakaoPayReadyRequest);
     return ResponseEntity.ok(ApiStandardResponse.success(kakaoPayReadyResponse));
   }
