@@ -31,7 +31,7 @@ public class PrinterController {
 
   private final PrinterService printerService;
 
-  @Operation(summary = "프린터 서버에 obj 전송", description = "obj 파일을 3D printer 서버로 전송한다.")
+  @Operation(summary = "프린터 서버에 obj 전송", description = "내부 로직으로 테스트를 위해 작성함.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "전송 성공"),
       @ApiResponse(responseCode = "400",

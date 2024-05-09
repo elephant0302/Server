@@ -13,10 +13,8 @@ import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
-import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.PaymentJpaRepository;
-import com.hyunn.capstone.repository.UserJpaRepository;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +39,6 @@ public class PrinterService {
   @Value("${printerServer.apiUri}")
   private String PrinterApiUri;
 
-  private final UserJpaRepository userJpaRepository;
   private final ImageJpaRepository imageJpaRepository;
   private final PaymentJpaRepository paymentJpaRepository;
   private final MessageService messageService;
@@ -153,7 +150,8 @@ public class PrinterService {
     paymentJpaRepository.save(existPayment);
 
     // 출력 완료에 대한 메시지 보내기
-    MessageResponse messageResponse = messageService.sendMessage(apiKey, MessageRequest.create(phone, email));
+    MessageResponse messageResponse = messageService.sendMessage(apiKey,
+        MessageRequest.create(phone, email));
 
     return messageResponse;
   }
