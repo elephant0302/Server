@@ -46,9 +46,12 @@ public class KakaoPayApproveResponse {
   @Schema(description = "승인 시간")
   private LocalDateTime approvedAt;
 
+  @Schema(description = "휴대폰 번호")
+  private String phoneNumber;
+
   public KakaoPayApproveResponse(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
-      LocalDateTime approvedAt) {
+      LocalDateTime approvedAt, String phoneNumber) {
     this.productName = productName;
     this.amount = amount;
     this.address = address;
@@ -57,10 +60,11 @@ public class KakaoPayApproveResponse {
     this.userNickname = userNickname;
     this.userEmail = userEmail;
     this.approvedAt = approvedAt;
+    this.phoneNumber = phoneNumber;
   }
 
   public static KakaoPayApproveResponse create() {
-    return new KakaoPayApproveResponse("null", null, "null", "null", null, "null", "null", null);
+    return new KakaoPayApproveResponse("null", null, "null", "null", null, "null", "null", null, "null");
   }
 }
 

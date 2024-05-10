@@ -6,19 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
-import com.hyunn.capstone.entity.BaseEntity;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
@@ -79,23 +75,21 @@ public class KakaoPayService {
    * 카카오페이 결제준비 단계
    */
   public KakaoPayReadyResponse getReady(Long imageId, String apiKey,
-      KakaoPayReadyRequest kakaoPayReadyRequest)
-      throws JsonProcessingException {
+      KakaoPayReadyRequest kakaoPayReadyRequest) throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    Optional<Image> image = Optional.ofNullable(
-        imageJpaRepository.findById(imageId)
-            .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
+    Optional<Image> image = Optional.ofNullable(imageJpaRepository.findById(imageId)
+        .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     if (image.get().getUser().getUserId() != user.get().getUserId()) {
-      throw new UserNotFoundException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
+      throw new UnauthorizedImageAccessException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
     }
     // 새로 만들기
 
@@ -123,11 +117,8 @@ public class KakaoPayService {
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
 
     // API 호출을 수행합니다.
-    ResponseEntity<String> response = restTemplate.exchange(
-        requestUrl,
-        HttpMethod.POST,
-        requestEntity,
-        String.class);
+    ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.POST,
+        requestEntity, String.class);
 
     // API 응답을 처리합니다.
     if (response.getStatusCode().is2xxSuccessful()) {
@@ -183,12 +174,8 @@ public class KakaoPayService {
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
 
     // API 호출을 수행합니다.
-    ResponseEntity<String> response = restTemplate.exchange(
-        approveUrl,
-        HttpMethod.POST,
-        requestEntity,
-        String.class
-    );
+    ResponseEntity<String> response = restTemplate.exchange(approveUrl, HttpMethod.POST,
+        requestEntity, String.class);
 
     // API 응답을 처리합니다.
     if (!response.getStatusCode().is2xxSuccessful()) {
@@ -212,9 +199,8 @@ public class KakaoPayService {
 
     String Partner_user_id = kakaoPayReadyResponse.getPartner_user_id();
 
-    Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(Partner_user_id)
-            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    Optional<User> user = Optional.ofNullable(userJpaRepository.findUserByPhone(Partner_user_id)
+        .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
@@ -237,6 +223,7 @@ public class KakaoPayService {
     kakaoPayApproveResponse.setUserNickname(user.get().getNickName());
     kakaoPayApproveResponse.setUserEmail(user.get().getEmail());
     kakaoPayApproveResponse.setApprovedAt(payment.getDate());
+    kakaoPayApproveResponse.setPhoneNumber(user.get().getPhone());
 
     return kakaoPayApproveResponse;
   }
