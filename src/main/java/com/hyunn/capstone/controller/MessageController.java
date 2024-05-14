@@ -33,7 +33,7 @@ public class MessageController {
 
   private final MessageService messageService;
 
-  @Operation(summary = "메세지 발송 (유료)", description = "해당 유저에게 이메일과 문자 메세지를 발송한다. 900회 가능")
+  @Operation(summary = "메세지 발송 (유료)", description = "해당 유저에게 이메일과 문자 메세지를 발송한다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "메세지 발송 설공"),
       @ApiResponse(responseCode = "400",
@@ -65,28 +65,9 @@ public class MessageController {
     return ResponseEntity.ok(ApiStandardResponse.success(messageResponse));
   }
 
-  @Operation(summary = "카카오톡 발송 (미사용 API)", description = "카카오 채널 등록 후 사용 가능")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "메세지 발송 설공"),
-      @ApiResponse(responseCode = "400",
-          description = "1. 파라미터가 부족합니다. \t\n"
-              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
-              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다. \t\n"
-              + "5. 해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
-                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "404",
-          description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 유저를 찾지 못했습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
-                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
+  /**
+   * 카카오톡 보내기 (사업자 등록 문제로 보류)
+   */
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/kakao")

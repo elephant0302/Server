@@ -153,29 +153,9 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
   }
 
-  @Operation(summary = "3D obj 정제 (미사용 API, 유료)", description = "사용 여부가 결정되지 않음.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "3D obj 정제"),
-      @ApiResponse(responseCode = "400",
-          description = "1. 파라미터가 부족합니다. \t\n"
-              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
-              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
-                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "404",
-          description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 이미지를 찾지 못했습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
-                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
-  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testApiKey2024")
+  /**
+   * 3D 모델 정제 (사용 보류)
+   */
   @PostMapping("/refine/{previewResult}")
   public ResponseEntity<ApiStandardResponse<String>> refine3D(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
