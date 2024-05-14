@@ -23,6 +23,9 @@
 <img src="https://velog.velcdn.com/images/jmjmjmz732002/post/a6c7a7be-ff27-4723-bfe2-d458ed641fab/image.png">
 <br>
 
+# 🎢 work flow
+<img src="https://velog.velcdn.com/images/hyuntae99/post/21d1a9c3-63b4-4ac8-95df-74c475b3d372/image.png">
+
 # 🗂️ Directory
 ```
 ├── java
