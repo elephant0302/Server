@@ -28,6 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -154,6 +155,7 @@ public class KakaoPayService {
   /**
    * 카카오페이 결제승인 단계
    */
+  @Transactional
   public KakaoPayApproveResponse getApprove(String pgToken) throws JsonProcessingException {
 
     // 요청 헤더를 구성합니다.
@@ -197,33 +199,17 @@ public class KakaoPayService {
     // KakaoPayApproveResponse 생성을 위한 나머지 데이터 추출
     String item_name = responseJson.get("item_name").asText();
 
-    String Partner_user_id = kakaoPayReadyResponse.getPartner_user_id();
-
-    Optional<User> user = Optional.ofNullable(userJpaRepository.findUserByPhone(Partner_user_id)
+    Optional<User> user = Optional.ofNullable(userJpaRepository.findUserByPhone(kakaoPayReadyResponse.getPartner_user_id())
         .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
 
-    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
-        user.get().getAddress(), "결제 완료", image.get());
+    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(), user.get().getAddress(), "결제 완료", image.get());
     paymentJpaRepository.save(payment);
 
-    Image existImage = image.get();
-    existImage.connectPayment(payment);
-    imageJpaRepository.save(existImage);
-
-    kakaoPayApproveResponse.setProductName(item_name);
-    KakaoPayApproveResponse.Amount amountDetail = new KakaoPayApproveResponse.Amount();
-    amountDetail.setTotal(amount.getTotal().intValue());
-    kakaoPayApproveResponse.setAddress(payment.getAddress());
-    kakaoPayApproveResponse.setShippingStatus("결제 완료");
-    kakaoPayApproveResponse.setImageId(kakaoPayReadyResponse.getImageId());
-    kakaoPayApproveResponse.setUserNickname(user.get().getNickName());
-    kakaoPayApproveResponse.setUserEmail(user.get().getEmail());
-    kakaoPayApproveResponse.setApprovedAt(payment.getDate());
-    kakaoPayApproveResponse.setPhoneNumber(user.get().getPhone());
+    kakaoPayApproveResponse = new KakaoPayApproveResponse(item_name, amount, payment.getAddress(), "결제 완료", image.get().getImageId(), user.get().getNickName(), user.get().getEmail(), payment.getDate(), user.get().getPhone());
 
     return kakaoPayApproveResponse;
   }
