@@ -3,6 +3,7 @@ package com.hyunn.capstone.controller;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.UserResponse;
 import com.hyunn.capstone.service.KakaoLoginService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class KakaoLoginController {
 
   private final KakaoLoginService kakaoLoginService;
 
+  @Hidden
   @GetMapping("/oauth2/code/kakao")
   public ResponseEntity<ApiStandardResponse<UserResponse>> kakaoLogin(
       @Parameter(description = "카카오톡 코드", required = true, example = "code1234567890")
