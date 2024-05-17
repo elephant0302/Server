@@ -8,6 +8,7 @@ import com.hyunn.capstone.dto.response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.service.ImageService;
 import com.hyunn.capstone.service.MeshyApiService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -120,7 +121,7 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionCreateResponse));
   }
 
-  @Operation(summary = "3D obj 생성", description = "3D 모델 코드로 3D obj를 생성 후 저장한다."
+  @Operation(summary = "3D obj 반환", description = "3D 모델 코드를 사용하여 3D obj를 생성 후 저장한다."
       + "\nthreeDimension의 경우 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D obj 반환"),
@@ -156,11 +157,10 @@ public class ImageController {
   /**
    * 3D 모델 정제 (사용 보류)
    */
+  @Hidden
   @PostMapping("/refine/{previewResult}")
   public ResponseEntity<ApiStandardResponse<String>> refine3D(
-      @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "3D 모델 코드", required = true)
-      @PathVariable String previewResult)
+      @RequestHeader String apiKey, @PathVariable String previewResult)
       throws JsonProcessingException {
     String message = meshyApiService.refine3D(apiKey, previewResult);
     return ResponseEntity.ok(ApiStandardResponse.success(message));

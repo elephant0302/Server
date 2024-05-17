@@ -5,6 +5,7 @@ import com.hyunn.capstone.dto.request.MessageRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.MessageResponse;
 import com.hyunn.capstone.service.MessageService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -68,6 +69,7 @@ public class MessageController {
   /**
    * 카카오톡 보내기 (사업자 등록 문제로 보류)
    */
+  @Hidden
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/kakao")
