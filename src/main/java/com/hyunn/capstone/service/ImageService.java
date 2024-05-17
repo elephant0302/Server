@@ -7,16 +7,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.response.ImageToTextResponse;
+import com.hyunn.capstone.entity.Description;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.DescriptionNotFoundException;
 import com.hyunn.capstone.exception.FileNotAllowedException;
 import com.hyunn.capstone.exception.S3UploadException;
+import com.hyunn.capstone.repository.DescriptionJpaRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,9 +49,12 @@ public class ImageService {
 
   private final AmazonS3Client amazonS3Client;
 
+  private final DescriptionJpaRepository descriptionJpaRepository;
+
   /**
    * img_to_text (flask 서버에 이미지를 보내 키워드를 받아온다.)
    */
+  @Transactional
   public ImageToTextResponse imageToText(String apiKey, MultipartFile multipartFile,
       String gender, String emotion) throws JsonProcessingException {
     // API KEY 유효성 검사
@@ -113,18 +121,31 @@ public class ImageService {
       values.add(entry.getValue().asDouble());
     });
 
-    // 다시 객체로 만들어서 반환한다.
+    // 다시 객체로 만들어서 반환한다. + 가장 높게 나온 동물을 저장한다.
+    Double maxValue = (double) 0;
+    String maxKey = "";
     Map<String, Double> keyWordMap = new HashMap<>();
     for (int i = 0; i < keys.size(); i++) {
       keyWordMap.put(keys.get(i), values.get(i));
+      if (values.get(i) > maxValue) {
+        maxValue = values.get(i);
+        maxKey = keys.get(i);
+      }
     }
 
-    return ImageToTextResponse.create(image, gender, emotion, keyWordMap);
+    // 성별과 동물로 관련 정보를 가져온다.
+    Optional<Description> explain = Optional.ofNullable(
+        descriptionJpaRepository.findByKeywordAndGender(maxKey, gender)
+            .orElseThrow(() -> new DescriptionNotFoundException("설명 정보를 가져오지 못했습니다.")));
+
+    return ImageToTextResponse.create(image, gender, emotion, keyWordMap, explain.get().getTitle(),
+        explain.get().getExample());
   }
 
   /**
    * S3로 파일 업로드
    */
+  @Transactional
   public String uploadFile(MultipartFile multipartFile) {
 
     if (multipartFile.getSize() == 0) {

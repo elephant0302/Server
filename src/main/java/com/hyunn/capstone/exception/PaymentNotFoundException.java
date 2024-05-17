@@ -7,7 +7,7 @@ public class PaymentNotFoundException extends RuntimeException {
   }
 
   public ErrorStatus toErrorCode() {
-    return ErrorStatus.PAYMENR_NOT_FOUND_EXCEPTION;
+    return ErrorStatus.PAYMENT_NOT_FOUND_EXCEPTION;
   }
 
 }
