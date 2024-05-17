@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -45,6 +46,7 @@ public class MeshyApiService {
   /**
    * text_to_3d
    */
+  @Transactional
   public ThreeDimensionCreateResponse textTo3D(String apiKey, String keyWord,
       ThreeDimensionCreateRequest threeDimensionCreateRequest)
       throws JsonProcessingException {
@@ -120,6 +122,7 @@ public class MeshyApiService {
   /**
    * 3D 모델 반환
    */
+  @Transactional
   public ThreeDimensionResponse return3D(String apiKey, String preview_result) {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {

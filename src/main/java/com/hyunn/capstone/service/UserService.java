@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class UserService {
   /**
    * 주소 업데이트 (카카오 정보에 주소가 없는 경우나 주소를 수정할 경우)
    */
+  @Transactional
   public String updateAddress(String apiKey, UserRequest userRequest, String address) {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -52,6 +54,7 @@ public class UserService {
   /**
    * 이미지 등록
    */
+  @Transactional
   public String setImage(String apiKey, UserRequest userRequest, Long imageId) {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -90,6 +93,7 @@ public class UserService {
   /**
    * 유저 삭제
    */
+  @Transactional
   public void deleteUser(String apiKey, UserRequest userRequest) {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -114,6 +118,7 @@ public class UserService {
   /**
    * 유저 정보로 관련 이미지 리스트로 반환하기
    */
+  @Transactional
   public List<ThreeDimensionResponse> findImagesByUser(String apiKey, UserRequest userRequest) {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
