@@ -58,9 +58,18 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. S3 업로드가 실패했습니다.",
+              + "2. S3 업로드가 실패했습니다. \t\n"
+              + "3. 설명 정보를 가져오지 못했습니다. \t\n"
+              + "4. 이미지 파일만 업로드 가능합니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -98,9 +107,16 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 이미지를 찾지 못했습니다. \t\n"
+              + "2. 유저를 찾지 못했습니다. \t\n"
               + "3. S3 업로드가 실패했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
@@ -112,7 +128,7 @@ public class ImageController {
   @PostMapping("/text_to_3D/{keyWord}")
   public ResponseEntity<ApiStandardResponse<ThreeDimensionCreateResponse>> textTo3D(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "3개의 키워드 중 가장 닮은 키워드", required = true, example = "dog")
+      @Parameter(description = "닮은 동물 키워드", required = true, example = "dog")
       @PathVariable String keyWord,
       @Valid @RequestBody ThreeDimensionCreateRequest threeDimensionCreateRequest)
       throws JsonProcessingException {
@@ -122,7 +138,7 @@ public class ImageController {
   }
 
   @Operation(summary = "3D obj 반환", description = "3D 모델 코드를 사용하여 3D obj를 생성 후 저장한다."
-      + "\nthreeDimension의 경우 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다.")
+      + "\n생성되는데 시간이 걸리므로 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D obj 반환"),
       @ApiResponse(responseCode = "400",
@@ -135,6 +151,13 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 이미지를 찾지 못했습니다.",
