@@ -8,6 +8,7 @@ import com.hyunn.capstone.dto.response.ThreeDimensionCreateResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.service.ImageService;
 import com.hyunn.capstone.service.MeshyApiService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -57,9 +58,18 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. S3 업로드가 실패했습니다.",
+              + "2. S3 업로드가 실패했습니다. \t\n"
+              + "3. 설명 정보를 가져오지 못했습니다. \t\n"
+              + "4. 이미지 파일만 업로드 가능합니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -97,9 +107,16 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 이미지를 찾지 못했습니다. \t\n"
+              + "2. 유저를 찾지 못했습니다. \t\n"
               + "3. S3 업로드가 실패했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
@@ -111,7 +128,7 @@ public class ImageController {
   @PostMapping("/text_to_3D/{keyWord}")
   public ResponseEntity<ApiStandardResponse<ThreeDimensionCreateResponse>> textTo3D(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "3개의 키워드 중 가장 닮은 키워드", required = true, example = "dog")
+      @Parameter(description = "닮은 동물 키워드", required = true, example = "dog")
       @PathVariable String keyWord,
       @Valid @RequestBody ThreeDimensionCreateRequest threeDimensionCreateRequest)
       throws JsonProcessingException {
@@ -120,8 +137,8 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionCreateResponse));
   }
 
-  @Operation(summary = "3D obj 생성", description = "3D 모델 코드로 3D obj를 생성 후 저장한다."
-      + "\nthreeDimension의 경우 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다.")
+  @Operation(summary = "3D obj 반환", description = "3D 모델 코드를 사용하여 3D obj를 생성 후 저장한다."
+      + "\n생성되는데 시간이 걸리므로 실행 중일 때는 퍼센트를 반환하고 완료되면 3D 코드를 반환한다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D obj 반환"),
       @ApiResponse(responseCode = "400",
@@ -134,6 +151,13 @@ public class ImageController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 이미지를 찾지 못했습니다.",
@@ -153,34 +177,13 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
   }
 
-  @Operation(summary = "3D obj 정제 (미사용 API, 유료)", description = "사용 여부가 결정되지 않음.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "3D obj 정제"),
-      @ApiResponse(responseCode = "400",
-          description = "1. 파라미터가 부족합니다. \t\n"
-              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
-              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
-                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "404",
-          description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 이미지를 찾지 못했습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
-                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
-  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testApiKey2024")
+  /**
+   * 3D 모델 정제 (사용 보류)
+   */
+  @Hidden
   @PostMapping("/refine/{previewResult}")
   public ResponseEntity<ApiStandardResponse<String>> refine3D(
-      @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "3D 모델 코드", required = true)
-      @PathVariable String previewResult)
+      @RequestHeader String apiKey, @PathVariable String previewResult)
       throws JsonProcessingException {
     String message = meshyApiService.refine3D(apiKey, previewResult);
     return ResponseEntity.ok(ApiStandardResponse.success(message));

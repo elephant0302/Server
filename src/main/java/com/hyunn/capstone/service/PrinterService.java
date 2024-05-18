@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -46,6 +47,7 @@ public class PrinterService {
   /**
    * 3D 프린터 서버에 obj 전송
    */
+  @Transactional
   public String sendObj(String apiKey, Long imageId) throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -124,6 +126,7 @@ public class PrinterService {
   /**
    * 3D 프린터 서버에서 완료 요청
    */
+  @Transactional
   public MessageResponse commit(String apiKey, Long paymentId) throws IOException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {

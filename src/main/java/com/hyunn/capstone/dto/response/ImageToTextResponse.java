@@ -24,15 +24,24 @@ public class ImageToTextResponse {
           + "        }")
   private Map keyWord;
 
-  public ImageToTextResponse(String image, String gender, String emotion, Map keyWord) {
+  @Schema(type = "String", description = "제목", example = "세련된 고양이상")
+  private String title;
+
+  @Schema(type = "String", description = "예시", example = "블랙핑크 제니, ITZY 예지, 뉴진스 해린")
+  private String example;
+
+  public ImageToTextResponse(String image, String gender, String emotion, Map keyWord, String title,
+      String example) {
     this.image = image;
     this.gender = gender;
     this.emotion = emotion;
     this.keyWord = keyWord;
+    this.title = title;
+    this.example = example;
   }
 
   public static ImageToTextResponse create(String image, String gender, String emotion,
-      Map keyWord) {
-    return new ImageToTextResponse(image, gender, emotion, keyWord);
+      Map keyWord,  String title, String example) {
+    return new ImageToTextResponse(image, gender, emotion, keyWord, title, example);
   }
 }

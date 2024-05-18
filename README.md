@@ -23,6 +23,9 @@
 <img src="https://velog.velcdn.com/images/jmjmjmz732002/post/a6c7a7be-ff27-4723-bfe2-d458ed641fab/image.png">
 <br>
 
+# 🎢 work flow
+<img src="https://velog.velcdn.com/images/hyuntae99/post/21d1a9c3-63b4-4ac8-95df-74c475b3d372/image.png">
+
 # 🗂️ Directory
 ```
 ├── java
@@ -32,19 +35,22 @@
 │               ├── CapstoneApplication
 │               ├── config
 │               │   ├── AmazonS3Config
-│               │   └── SwaggerConfig
+│               │   ├── SwaggerConfig
+│               │   └── WebConfig
 │               ├── controller
 │               │   ├── test
 │               │   │   ├── ImageDto
 │               │   │   └── TestController
 │               │   ├── ImageController
 │               │   ├── KakaoLoginController
+│               │   ├── KakaoPayController
 │               │   ├── MessageController
 │               │   ├── PrinterController
 │               │   └── UserController
 │               ├── dto
 │               │   ├── Request
 │               │   │   ├── ImageRequest
+│               │   │   ├── KakaoPayReadyRequest
 │               │   │   ├── MessageRequest
 │               │   │   ├── ThreeDimensionCreateRequest
 │               │   │   └── UserRequest
@@ -52,15 +58,18 @@
 │               │   │   ├── ApiStandardResponse
 │               │   │   ├── ErrorResponse
 │               │   │   ├── ImageToTextResponse
+│               │   │   ├── KakaoPayApproveRequest
+│               │   │   ├── KakaoPayReadyRequest
 │               │   │   ├── MessageRespnose
 │               │   │   ├── ThreeDimesionCreateResponse
 │               │   │   ├── ThreeDimesionResponse
 │               │   │   └── UserResponse
 │               ├── entity
 │               │   │── BaseEntity
+│               │   │── Description
 │               │   │── Image
 │               │   │── Payment
-│               │   │── User
+│               │   └── User
 │               ├── exception
 │               │   └── Handler
 │               │   │   ├── GlobalExceptionHandler
@@ -71,19 +80,23 @@
 │               │   │   └── UserExceptionHandler
 │               │   │── ApiKeyNotValidException
 │               │   │── ApiNotFoundException
+│               │   │── DescriptionNoFoundException
 │               │   │── ErrorStatus
 │               │   │── FileNotAllowedException
 │               │   │── ImageNotFoundException
+│               │   │── PaymentNoFoundException
 │               │   │── RootUserException
 │               │   │── S3UploadException
 │               │   └── UserNotFoundException
 │               ├── repository
+│               │   │── DescriptionJpaRespository
 │               │   │── ImageJpaRespository
 │               │   │── PaymentJpaRespository
 │               │   └── UserJpaRepositoty
 │               └── service
 │                   ├── ImageService
 │                   ├── KakaoLoginService
+│                   ├── KakaoPayService
 │                   ├── MeshyApiService
 │                   ├── MessageService
 │                   ├── PrinterService

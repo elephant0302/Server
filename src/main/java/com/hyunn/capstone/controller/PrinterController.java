@@ -31,40 +31,6 @@ public class PrinterController {
 
   private final PrinterService printerService;
 
-  @Operation(summary = "프린터 서버에 obj 전송", description = "내부 로직으로 테스트를 위해 작성함.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "전송 성공"),
-      @ApiResponse(responseCode = "400",
-          description = "1. 파라미터가 부족합니다. \t\n"
-              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
-              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 해당 계정은 로직을 위한 루트 계정으로 해당 서비스를 지원하지 않습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
-                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "404",
-          description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 유저를 찾지 못했습니다. \t\n"
-              + "3. 이미지를 찾지 못했습니다. \t\n"
-              + "4. 결제 정보를 찾지 못했습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
-                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
-  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testApiKey2024")
-  @PostMapping()
-  public ResponseEntity<ApiStandardResponse<String>> sendObj(
-      @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Parameter(description = "이미지 id", required = true, example = "1 (Long)")
-      @RequestParam("image_id") Long imageId) throws JsonProcessingException {
-    String response = printerService.sendObj(apiKey, imageId);
-    return ResponseEntity.ok(ApiStandardResponse.success(response));
-  }
-
   @Operation(summary = "완성 메세지 받기", description = "3D printer 서버에서 완료 요청.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "완료 반영 성공"),
@@ -78,6 +44,13 @@ public class PrinterController {
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 결제 정보를 찾지 못했습니다.",
