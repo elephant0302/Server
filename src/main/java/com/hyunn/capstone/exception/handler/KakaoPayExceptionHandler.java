@@ -4,9 +4,10 @@ import static com.hyunn.capstone.exception.ErrorStatus.INVALID_JSON_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.INVALID_PARAMETER;
 import static com.hyunn.capstone.exception.ErrorStatus.MEDIA_TYPE_NOT_SUPPORTED_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.NEED_MORE_PARAMETER;
+import static com.hyunn.capstone.exception.ErrorStatus.UNAUTHORIZED_IMAGE_ACCESS_EXCEPTION;
 import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 
-import com.hyunn.capstone.controller.KakaoLoginController;
+import com.hyunn.capstone.controller.KakaoPayController;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {KakaoLoginController.class})
+@RestControllerAdvice(assignableTypes = {KakaoPayController.class})
 public class KakaoPayExceptionHandler {
 
   // API 응답이 올바르지 않은 경우
@@ -44,32 +45,11 @@ public class KakaoPayExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 
-  // 유저를 찾을 수 없는 경우
+  // 유저를 찾을 수 없음
   @ExceptionHandler(UserNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiStandardResponse<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
     log.error("", e);
-
-    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  // 이미지를 찾을 수 없는 경우
-  @ExceptionHandler(ImageNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
-    log.error("", e);
-
-    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  // 이미지 id와 유저 id가 다른 경우
-  @ExceptionHandler(UnauthorizedImageAccessException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ApiStandardResponse<ErrorResponse> handleUnauthorizedImageAccessException(UnauthorizedImageAccessException e) {
-    log.error("", e);
-
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
     return ApiStandardResponse.fail(errorResponse);
   }
@@ -154,4 +134,24 @@ public class KakaoPayExceptionHandler {
         "지원하지 않는 형식의 데이터 요청입니다.");
     return ApiStandardResponse.fail(errorResponse);
   }
+
+  // 이미지를 찾을 수 없음
+  @ExceptionHandler(ImageNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiStandardResponse<ErrorResponse> handleImageNotFoundException(ImageNotFoundException e) {
+    log.error("", e);
+    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
+  // 해당 유저가 소유하고 있는 이미지가 아닐 때
+  @ExceptionHandler(UnauthorizedImageAccessException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ApiStandardResponse<ErrorResponse> handleUnauthorizedImageAccessException(
+      UnauthorizedImageAccessException e) {
+    ErrorResponse errorResponse = ErrorResponse.create(UNAUTHORIZED_IMAGE_ACCESS_EXCEPTION,
+        "해당 유저가 소유하고 있는 이미지가 아닙니다.");
+    return ApiStandardResponse.fail(errorResponse);
+  }
+
 }
