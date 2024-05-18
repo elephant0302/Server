@@ -64,8 +64,6 @@ public class KakaoPayService {
 
   private KakaoPayReadyResponse kakaoPayReadyResponse = KakaoPayReadyResponse.create();
 
-  private KakaoPayApproveResponse kakaoPayApproveResponse = KakaoPayApproveResponse.create();
-
   private final ImageJpaRepository imageJpaRepository;
 
   private final UserJpaRepository userJpaRepository;
@@ -209,8 +207,6 @@ public class KakaoPayService {
     Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(), user.get().getAddress(), "결제 완료", image.get());
     paymentJpaRepository.save(payment);
 
-    kakaoPayApproveResponse = new KakaoPayApproveResponse(item_name, amount, payment.getAddress(), "결제 완료", image.get().getImageId(), user.get().getNickName(), user.get().getEmail(), payment.getDate(), user.get().getPhone());
-
-    return kakaoPayApproveResponse;
+    return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료", image.get().getImageId(), user.get().getNickName(), user.get().getEmail(), payment.getDate(), user.get().getPhone());
   }
 }

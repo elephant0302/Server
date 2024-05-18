@@ -63,8 +63,10 @@ public class KakaoPayApproveResponse {
     this.phoneNumber = phoneNumber;
   }
 
-  public static KakaoPayApproveResponse create() {
-    return new KakaoPayApproveResponse("null", null, "null", "null", null, "null", "null", null, "null");
+  public static KakaoPayApproveResponse create(String productName, Amount amount, String address,
+      String shippingStatus, Long imageId, String userNickname, String userEmail,
+      LocalDateTime approvedAt, String phoneNumber) {
+    return new KakaoPayApproveResponse(productName, amount, address, shippingStatus, imageId, userNickname, userEmail, approvedAt, phoneNumber);
   }
 }
 
