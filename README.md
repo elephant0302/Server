@@ -58,8 +58,8 @@
 │               │   │   ├── ApiStandardResponse
 │               │   │   ├── ErrorResponse
 │               │   │   ├── ImageToTextResponse
-│               │   │   ├── KakaoPayApproveRequest
-│               │   │   ├── KakaoPayReadyRequest
+│               │   │   ├── KakaoPayApproveResponse
+│               │   │   ├── KakaoPayReadyResponse
 │               │   │   ├── MessageRespnose
 │               │   │   ├── ThreeDimesionCreateResponse
 │               │   │   ├── ThreeDimesionResponse
@@ -75,6 +75,7 @@
 │               │   │   ├── GlobalExceptionHandler
 │               │   │   ├── ImageExceptionHandler
 │               │   │   ├── KakaoLoginExceptionHandler
+│               │   │   ├── KakaoPayExceptionHandler
 │               │   │   ├── MessageExceptionHandler
 │               │   │   ├── PrinterServerExceptionHandler
 │               │   │   └── UserExceptionHandler
@@ -87,6 +88,7 @@
 │               │   │── PaymentNoFoundException
 │               │   │── RootUserException
 │               │   │── S3UploadException
+│               │   │── UnauthorizedImageAccessException
 │               │   └── UserNotFoundException
 │               ├── repository
 │               │   │── DescriptionJpaRespository

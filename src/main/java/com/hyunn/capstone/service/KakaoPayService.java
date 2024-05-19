@@ -11,13 +11,10 @@ import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
@@ -31,6 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -75,25 +73,25 @@ public class KakaoPayService {
   /**
    * 카카오페이 결제준비 단계
    */
-  public KakaoPayReadyResponse getReady(Long imageId, String phone, String apiKey,
-      KakaoPayReadyRequest kakaoPayReadyRequest)
-      throws JsonProcessingException {
+  @Transactional
+  public KakaoPayReadyResponse getReady(Long imageId, String apiKey,
+      KakaoPayReadyRequest kakaoPayReadyRequest) throws JsonProcessingException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    Optional<Image> image = Optional.ofNullable(
-        imageJpaRepository.findById(imageId)
-            .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
+    Optional<Image> image = Optional.ofNullable(imageJpaRepository.findById(imageId)
+        .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
     Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(phone)
+        userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     if (image.get().getUser().getUserId() != user.get().getUserId()) {
-      throw new UserNotFoundException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
+      throw new UnauthorizedImageAccessException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
     }
+    // 새로 만들기
 
     String partner_user_id = kakaoPayReadyRequest.getPartner_user_id();
     // 요청 바디를 구성합니다.
@@ -119,11 +117,8 @@ public class KakaoPayService {
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
 
     // API 호출을 수행합니다.
-    ResponseEntity<String> response = restTemplate.exchange(
-        requestUrl,
-        HttpMethod.POST,
-        requestEntity,
-        String.class);
+    ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.POST,
+        requestEntity, String.class);
 
     // API 응답을 처리합니다.
     if (response.getStatusCode().is2xxSuccessful()) {
@@ -156,10 +151,10 @@ public class KakaoPayService {
     return kakaoPayReadyResponse;
   }
 
-
   /**
    * 카카오페이 결제승인 단계
    */
+  @Transactional
   public KakaoPayApproveResponse getApprove(String pgToken) throws JsonProcessingException {
 
     // 요청 헤더를 구성합니다.
@@ -180,12 +175,8 @@ public class KakaoPayService {
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
 
     // API 호출을 수행합니다.
-    ResponseEntity<String> response = restTemplate.exchange(
-        approveUrl,
-        HttpMethod.POST,
-        requestEntity,
-        String.class
-    );
+    ResponseEntity<String> response = restTemplate.exchange(approveUrl, HttpMethod.POST,
+        requestEntity, String.class);
 
     // API 응답을 처리합니다.
     if (!response.getStatusCode().is2xxSuccessful()) {
@@ -205,41 +196,18 @@ public class KakaoPayService {
     amount.setTotal(responseJson.get("amount").get("total").asInt());
 
     // KakaoPayApproveResponse 생성을 위한 나머지 데이터 추출
-    String aid = responseJson.get("aid").asText();
-    String payment_method_type = responseJson.get("payment_method_type").asText();
     String item_name = responseJson.get("item_name").asText();
-    String item_code = responseJson.get("item_code").asText();
-    Integer quantity = responseJson.get("quantity").asInt();
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-    LocalDateTime created_at = LocalDateTime.parse(responseJson.get("created_at").asText(),
-        formatter);
-    LocalDateTime approved_at = LocalDateTime.parse(responseJson.get("approved_at").asText(),
-        formatter);
-
-    String Partner_user_id = kakaoPayReadyResponse.getPartner_user_id();
-
-    Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(Partner_user_id)
-            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    Optional<User> user = Optional.ofNullable(userJpaRepository.findUserByPhone(kakaoPayReadyResponse.getPartner_user_id())
+        .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
 
-    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
-        user.get().getAddress(), "결제 완료", image.get());
+    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(), user.get().getAddress(), "결제 완료", image.get());
     paymentJpaRepository.save(payment);
 
-    Image existImage = image.get();
-    existImage.connectPayment(payment);
-    imageJpaRepository.save(existImage);
-
-    return KakaoPayApproveResponse.create(
-        aid, kakaoPayReadyResponse.getTid(), cid, payment_method_type, Partner_user_id,
-        amount, item_name, item_code, quantity,
-        created_at, approved_at
-    );
+    return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료", image.get().getImageId(), user.get().getNickName(), user.get().getEmail(), payment.getDate(), user.get().getPhone());
   }
-
 }
