@@ -38,22 +38,31 @@ public class KakaoPayController {
   @Value("${spring.security.oauth2.client.kakaoPay.client-id}")
   private String cid;
 
-  @Operation(summary = "결제 요청", description = "request 값을 받아 tid 생성을 통한 결제 준비")
+  @Operation(summary = "결제 준비 요청", description = "결제 준비 단계, 사용자는 이 단계를 거쳐 결제 승인을 받습니다.")
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "키워드 반환"),
+      @ApiResponse(responseCode = "200", description = "결제 준비 성공, 사용자는 결제 승인을 진행할 수 있습니다."),
       @ApiResponse(responseCode = "400",
           description = "1. 파라미터가 부족합니다. \t\n"
               + "2. 올바르지 않은 파라미터 값입니다. \t\n"
               + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다. \t\n",
+              + "4. 지원하지 않는 형식의 데이터 요청입니다. \t\n"
+              + "5. 해당 유저가 소유하고 있는 이미지가 아닙니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 유저를 찾지 못했습니다.",
+              + "2. 유저를 찾지 못했습니다. \t\n"
+              + "3. 이미지를 찾지 못했습니다. \t\n",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","

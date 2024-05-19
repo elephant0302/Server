@@ -73,6 +73,7 @@ public class KakaoPayService {
   /**
    * 카카오페이 결제준비 단계
    */
+  @Transactional
   public KakaoPayReadyResponse getReady(Long imageId, String apiKey,
       KakaoPayReadyRequest kakaoPayReadyRequest) throws JsonProcessingException {
     // API KEY 유효성 검사
