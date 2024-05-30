@@ -25,7 +25,7 @@ public class KakaoPayReadyRequest {
   private Integer quantity;
 
   @Schema(type = "Integer", description = "상품 총액", example = "1100")
-  @NotNull(message = "상품 수량을 입력해주세요.")
+  @NotNull(message = "상품 금액을 입력해주세요.")
   @Min(value = 1, message = "상품 금액은 최소 1 이상이어야 합니다.")
   private Integer total_amount;
 

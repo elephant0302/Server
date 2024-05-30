@@ -63,6 +63,13 @@ public class KakaoPayApproveResponse {
     this.phoneNumber = phoneNumber;
   }
 
+
+  public static KakaoPayApproveResponse create() {
+    Amount amount = new Amount();
+    amount.setTotal(0);  // Amount 객체의 total 필드를 0으로 초기화
+
+    return new KakaoPayApproveResponse("null", amount, "null", "null", 0L, "null","null",LocalDateTime.now(),"null");
+  }
   public static KakaoPayApproveResponse create(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
       LocalDateTime approvedAt, String phoneNumber) {

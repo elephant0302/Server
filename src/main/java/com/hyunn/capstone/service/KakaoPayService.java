@@ -3,8 +3,10 @@ package com.hyunn.capstone.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hyunn.capstone.dto.request.KakaoPayCancelRequest;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
+import com.hyunn.capstone.dto.response.KakaoPayCancelResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.Payment;
@@ -12,6 +14,7 @@ import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -198,16 +201,86 @@ public class KakaoPayService {
     // KakaoPayApproveResponse 생성을 위한 나머지 데이터 추출
     String item_name = responseJson.get("item_name").asText();
 
-    Optional<User> user = Optional.ofNullable(userJpaRepository.findUserByPhone(kakaoPayReadyResponse.getPartner_user_id())
-        .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+    Optional<User> user = Optional.ofNullable(
+        userJpaRepository.findUserByPhone(kakaoPayReadyResponse.getPartner_user_id())
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
 
-    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(), user.get().getAddress(), "결제 완료", image.get());
+    Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
+        user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(), kakaoPayReadyResponse.getPartner_user_id(), image.get());
     paymentJpaRepository.save(payment);
 
-    return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료", image.get().getImageId(), user.get().getNickName(), user.get().getEmail(), payment.getDate(), user.get().getPhone());
+    return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료",
+        image.get().getImageId(), user.get().getNickName(), user.get().getEmail(),
+        payment.getDate(), user.get().getPhone());
   }
+
+  /**
+   * 카카오페이 결제 취소 단계
+   */
+  public KakaoPayCancelResponse cancelPayment(String apiKey,
+      KakaoPayCancelRequest kakaoPayCancelRequest) throws JsonProcessingException {
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
+    String tid = kakaoPayCancelRequest.getTid();
+
+    // tid(결제 고유 번호)를 통해 결제 정보 조회
+    Optional<Payment> payment = Optional.ofNullable(
+        paymentJpaRepository.findByTid(tid)
+            .orElseThrow(()-> new ApiNotFoundException("tid를 통해 결제 정보를 찾을 수 없습니다.: "+ tid)));
+
+    // 유저 정보 조회
+    Optional<User> user = Optional.ofNullable(
+        userJpaRepository.findUserByPhone(payment.get().getPartner_user_id())
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+
+    // 취소 요청 파라미터 설정
+    Map<String, Object> params = new HashMap<>();
+    params.put("cid", "TC0ONETIME");
+    params.put("tid", tid);
+    params.put("cancel_amount", payment.get().getPrice());
+    params.put("cancel_tax_free_amount", 0);
+
+    // API 호출
+    RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "SECRET_KEY " + admin_Key);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
+
+    ResponseEntity<String> response = restTemplate.exchange(
+        redirect_cancel_url, HttpMethod.POST, requestEntity, String.class);
+
+    if (!response.getStatusCode().is2xxSuccessful()) {
+      throw new ApiNotFoundException("API 호출에 실패했습니다. 상태 코드: " + response.getStatusCode());
+    }
+
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode responseJson = mapper.readTree(response.getBody());
+
+    // 취소 금액 정보 파싱
+    KakaoPayCancelResponse.CanceledAmount canceledAmount = new KakaoPayCancelResponse.CanceledAmount();
+    canceledAmount.setTotal(responseJson.get("canceled_amount").get("total").asInt());
+    canceledAmount.setTaxFree(responseJson.get("canceled_amount").get("tax_free").asInt());
+    canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
+
+    // 성공 응답 반환
+    return new KakaoPayCancelResponse(
+        payment.get().getProductName(),
+        canceledAmount,
+        payment.get().getTid(),
+        "결제 취소", // 상태는 취소로 설정
+        user.get().getNickName(),
+        user.get().getEmail(),
+        LocalDateTime.now(), // 취소 시간
+        user.get().getPhone()
+    );
+  }
+
 }
