@@ -29,7 +29,6 @@ public class UserService {
 
   private final UserJpaRepository userJpaRepository;
   private final ImageJpaRepository imageJpaRepository;
-  private final PaymentJpaRepository paymentJpaRepository;
 
   /**
    * 주소 업데이트 (카카오 정보에 주소가 없는 경우나 주소를 수정할 경우)
@@ -170,7 +169,8 @@ public class UserService {
         .filter(image -> image.getPayment() != null)
         .map(image -> PaymentResponse.create(image.getPayment().getPaymentId(),
             image.getPayment().getProductName(), image.getPayment().getPrice(),
-            image.getPayment().getAddress(), image.getPayment().getShipping(), image.getPayment().getTid(),
+            image.getPayment().getAddress(), image.getPayment().getShipping(),
+            image.getPayment().getTid(),
             image.getImageId(), image.getImage(), image.getThreeDimension(), image.getKeyWord()))
         .collect(Collectors.toList());
 

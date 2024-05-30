@@ -6,6 +6,7 @@ import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.service.KakaoPayService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -71,7 +72,7 @@ public class KakaoPayController {
                   + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
                   + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapikey1234")
+      in = ParameterIn.HEADER, example = "testapikey2024")
   @PostMapping("/ready")
   public ResponseEntity<ApiStandardResponse<KakaoPayReadyResponse>> getReady(
       @Parameter(description = "이미지 ID", required = true, example = "1 (Long)")
@@ -84,8 +85,7 @@ public class KakaoPayController {
     return ResponseEntity.ok(ApiStandardResponse.success(kakaoPayReadyResponse));
   }
 
-  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapikey1234")
+  @Hidden
   @GetMapping("/success")
   public ResponseEntity<ApiStandardResponse<KakaoPayApproveResponse>> approvePayment(
       @RequestParam("pg_token") String pgToken) throws JsonProcessingException {

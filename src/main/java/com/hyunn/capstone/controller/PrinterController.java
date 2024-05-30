@@ -1,6 +1,5 @@
 package com.hyunn.capstone.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.MessageResponse;
 import com.hyunn.capstone.service.PrinterService;
