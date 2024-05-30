@@ -41,6 +41,10 @@ public class Payment extends BaseEntity {
   @Column(name = "Shipping")
   private String Shipping;
 
+  // 결제 정보
+  @Column(name = "tid")
+  private String tid;
+
   // 이미지와 1대1
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "image_id")
