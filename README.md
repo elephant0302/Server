@@ -40,6 +40,7 @@
 │               ├── controller
 │               │   ├── test
 │               │   │   ├── ImageDto
+│               │   │   ├── PaymentDto
 │               │   │   └── TestController
 │               │   ├── ImageController
 │               │   ├── KakaoLoginController
@@ -61,6 +62,7 @@
 │               │   │   ├── KakaoPayApproveResponse
 │               │   │   ├── KakaoPayReadyResponse
 │               │   │   ├── MessageRespnose
+│               │   │   ├── PaymentResponse
 │               │   │   ├── ThreeDimesionCreateResponse
 │               │   │   ├── ThreeDimesionResponse
 │               │   │   └── UserResponse

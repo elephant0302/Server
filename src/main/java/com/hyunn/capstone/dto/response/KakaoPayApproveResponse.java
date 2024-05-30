@@ -1,11 +1,10 @@
 package com.hyunn.capstone.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -25,7 +24,7 @@ public class KakaoPayApproveResponse {
   @ToString
   public static class Amount {
 
-    private Integer total;        // 전체 결제 금액
+    private Integer total; // 전체 결제 금액
   }
 
   @Schema(description = "배송지 주소")
@@ -49,9 +48,12 @@ public class KakaoPayApproveResponse {
   @Schema(description = "휴대폰 번호")
   private String phoneNumber;
 
+  @Schema(description = "3D 프린터 서버에 대한 응답값")
+  private String message;
+
   public KakaoPayApproveResponse(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
-      LocalDateTime approvedAt, String phoneNumber) {
+      LocalDateTime approvedAt, String phoneNumber, String message) {
     this.productName = productName;
     this.amount = amount;
     this.address = address;
@@ -61,6 +63,7 @@ public class KakaoPayApproveResponse {
     this.userEmail = userEmail;
     this.approvedAt = approvedAt;
     this.phoneNumber = phoneNumber;
+    this.message = message;
   }
 
 
@@ -72,8 +75,9 @@ public class KakaoPayApproveResponse {
   }
   public static KakaoPayApproveResponse create(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
-      LocalDateTime approvedAt, String phoneNumber) {
-    return new KakaoPayApproveResponse(productName, amount, address, shippingStatus, imageId, userNickname, userEmail, approvedAt, phoneNumber);
+      LocalDateTime approvedAt, String phoneNumber, String message) {
+    return new KakaoPayApproveResponse(productName, amount, address, shippingStatus, imageId,
+        userNickname, userEmail, approvedAt, phoneNumber, message);
   }
 }
 

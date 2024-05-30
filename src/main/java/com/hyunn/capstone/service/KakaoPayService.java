@@ -19,10 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import com.hyunn.capstone.exception.ImageNotFoundException;
+import com.hyunn.capstone.exception.RootUserException;
+import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -71,10 +76,9 @@ public class KakaoPayService {
   private KakaoPayReadyResponse kakaoPayReadyResponse = KakaoPayReadyResponse.create();
 
   private final ImageJpaRepository imageJpaRepository;
-
   private final UserJpaRepository userJpaRepository;
-
   private final PaymentJpaRepository paymentJpaRepository;
+  private final PrinterService printerService;
 
   /**
    * 카카오페이 결제준비 단계
@@ -208,18 +212,31 @@ public class KakaoPayService {
         userJpaRepository.findUserByPhone(kakaoPayReadyResponse.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
+    // 루트 사용자 제한
+    if (user.get().getUserId() == 1) {
+      throw new RootUserException("해당 유저는 루트 유저로써 해당 기능을 수행할 수 없습니다.");
+    }
+
+
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
+    Image existImage = image.get();
 
     Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
         user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(),
-        kakaoPayReadyResponse.getPartner_user_id(), image.get());
+        kakaoPayReadyResponse.getPartner_user_id(), existImage);
     paymentJpaRepository.save(payment);
+    existImage.connectPayment(payment);
+    imageJpaRepository.save(existImage);
+
+    // 3D 프린터 서버에 요청 보내기
+    String message = printerService.sendObj(existImage);
 
     return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료",
         image.get().getImageId(), user.get().getNickName(), user.get().getEmail(),
-        payment.getDate(), user.get().getPhone());
+        payment.getDate(), user.get().getPhone(), message);
+
   }
 
   /**

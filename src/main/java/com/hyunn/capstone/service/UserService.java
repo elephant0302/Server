@@ -1,6 +1,7 @@
 package com.hyunn.capstone.service;
 
 import com.hyunn.capstone.dto.request.UserRequest;
+import com.hyunn.capstone.dto.response.PaymentResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
@@ -9,6 +10,7 @@ import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
+import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -141,6 +143,38 @@ public class UserService {
         .collect(Collectors.toList());
 
     return imageResponses;
+  }
+
+  /**
+   * 유저 정보로 관련 결제 정보 리스트로 반환하기
+   */
+  @Transactional
+  public List<PaymentResponse> findPaymentByUser(String apiKey, UserRequest userRequest) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+
+    String phone = userRequest.getPhone();
+    String email = userRequest.getEmail();
+
+    Optional<User> existUser = Optional.ofNullable(
+        userJpaRepository.findUserByPhoneAndEmail(phone, email)
+            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
+
+    List<Image> images = imageJpaRepository.findAllByUser(existUser);
+
+    // Entity에서 Dto로 변형
+    List<PaymentResponse> paymentResponses = images.stream()
+        .filter(image -> image.getPayment() != null)
+        .map(image -> PaymentResponse.create(image.getPayment().getPaymentId(),
+            image.getPayment().getProductName(), image.getPayment().getPrice(),
+            image.getPayment().getAddress(), image.getPayment().getShipping(),
+            image.getPayment().getTid(),
+            image.getImageId(), image.getImage(), image.getThreeDimension(), image.getKeyWord()))
+        .collect(Collectors.toList());
+
+    return paymentResponses;
   }
 
 }

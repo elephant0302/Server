@@ -48,7 +48,6 @@ public class ImageService {
   private String apiUri;
 
   private final AmazonS3Client amazonS3Client;
-
   private final DescriptionJpaRepository descriptionJpaRepository;
 
   /**
