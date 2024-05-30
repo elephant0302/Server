@@ -10,7 +10,6 @@ import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
@@ -48,20 +47,10 @@ public class PrinterService {
    * 3D 프린터 서버에 obj 전송
    */
   @Transactional
-  public String sendObj(String apiKey, Long imageId) throws JsonProcessingException {
-    // API KEY 유효성 검사
-    if (apiKey == null || !apiKey.equals(xApiKey)) {
-      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
-    }
-
-    // 이미지 검사
-    Optional<Image> image = Optional.ofNullable(
-        imageJpaRepository.findById(imageId)
-            .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
-
-    String obj = image.get().getThreeDimension();
-    Long userId = image.get().getUser().getUserId();
-    Long paymentId = image.get().getPayment().getPaymentId();
+  public String sendObj(Image image) throws JsonProcessingException {
+    String obj = image.getThreeDimension();
+    Long userId = image.getUser().getUserId();
+    Long paymentId = image.getPayment().getPaymentId();
 
     // 결제 정보 검사
     if (!paymentJpaRepository.existsById(paymentId)) {
