@@ -118,9 +118,9 @@ public class KakaoPayController {
   @PostMapping("/cancel")
   public ResponseEntity<ApiStandardResponse<KakaoPayCancelResponse>> cancelPayment(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @Valid @RequestBody KakaoPayCancelRequest kakaoPayCancelRequest
+      @RequestParam("tid") String tid
   ) throws JsonProcessingException {
-    KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, kakaoPayCancelRequest);
+    KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, tid);
     return ResponseEntity.ok(ApiStandardResponse.success(cancelResponse));
   }
 

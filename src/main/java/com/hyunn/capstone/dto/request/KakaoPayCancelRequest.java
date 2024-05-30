@@ -11,12 +11,4 @@ public class KakaoPayCancelRequest {
   @NotBlank(message = "결제 고유 번호를 입력하세요.")
   private String tid;
 
-  public KakaoPayCancelRequest(String tid) {
-    this.tid = tid;
-  }
-
-  public static KakaoPayCancelRequest create(String tid) {
-    return new KakaoPayCancelRequest(tid);
-  }
-
 }

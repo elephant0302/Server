@@ -53,6 +53,9 @@ public class KakaoPayService {
   @Value("${spring.security.oauth2.client.kakaoPay.approve-uri}")
   private String approveUrl;
 
+  @Value("${spring.security.oauth2.client.kakaoPay.cancel-uri}")
+  private String cancelUrl;
+
   @Value("${spring.security.oauth2.client.kakaoPay.redirect_approval_url}")
   private String redirect_approval_url;
 
@@ -103,7 +106,7 @@ public class KakaoPayService {
     params.put("partner_order_id", partner_order_id);
     params.put("partner_user_id", partner_user_id);
     params.put("item_name", kakaoPayReadyRequest.getItem_name());
-    params.put("quantity", kakaoPayReadyRequest.getQuantity());
+    params.put("quantity", 1);
     params.put("total_amount", kakaoPayReadyRequest.getTotal_amount());
     params.put("tax_free_amount", 0);
     params.put("approval_url", redirect_approval_url);
@@ -210,7 +213,8 @@ public class KakaoPayService {
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
 
     Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
-        user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(), kakaoPayReadyResponse.getPartner_user_id(), image.get());
+        user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(),
+        kakaoPayReadyResponse.getPartner_user_id(), image.get());
     paymentJpaRepository.save(payment);
 
     return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료",
@@ -221,30 +225,31 @@ public class KakaoPayService {
   /**
    * 카카오페이 결제 취소 단계
    */
-  public KakaoPayCancelResponse cancelPayment(String apiKey,
-      KakaoPayCancelRequest kakaoPayCancelRequest) throws JsonProcessingException {
+  @Transactional
+  public KakaoPayCancelResponse cancelPayment(String apiKey, String tid
+  ) throws JsonProcessingException {
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    String tid = kakaoPayCancelRequest.getTid();
-
     // tid(결제 고유 번호)를 통해 결제 정보 조회
-    Optional<Payment> payment = Optional.ofNullable(
+    Optional<Payment> p = Optional.ofNullable(
         paymentJpaRepository.findByTid(tid)
-            .orElseThrow(()-> new ApiNotFoundException("tid를 통해 결제 정보를 찾을 수 없습니다.: "+ tid)));
+            .orElseThrow(() -> new ApiNotFoundException("tid를 통해 결제 정보를 찾을 수 없습니다.: " + tid)));
 
+    Payment payment = p.get();
     // 유저 정보 조회
     Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(payment.get().getPartner_user_id())
+        userJpaRepository.findUserByPhone(payment.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
     // 취소 요청 파라미터 설정
     Map<String, Object> params = new HashMap<>();
     params.put("cid", "TC0ONETIME");
     params.put("tid", tid);
-    params.put("cancel_amount", payment.get().getPrice());
+    params.put("cancel_amount", payment.getPrice());
     params.put("cancel_tax_free_amount", 0);
+    params.put("cancel_available_amount", payment.getPrice());
 
     // API 호출
     RestTemplate restTemplate = new RestTemplate();
@@ -255,7 +260,7 @@ public class KakaoPayService {
     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
 
     ResponseEntity<String> response = restTemplate.exchange(
-        redirect_cancel_url, HttpMethod.POST, requestEntity, String.class);
+        cancelUrl, HttpMethod.POST, requestEntity, String.class);
 
     if (!response.getStatusCode().is2xxSuccessful()) {
       throw new ApiNotFoundException("API 호출에 실패했습니다. 상태 코드: " + response.getStatusCode());
@@ -269,12 +274,15 @@ public class KakaoPayService {
     canceledAmount.setTotal(responseJson.get("canceled_amount").get("total").asInt());
     canceledAmount.setTaxFree(responseJson.get("canceled_amount").get("tax_free").asInt());
     canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
-
+// 마이너스로 가격 설정
+    Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice()*-1,
+        user.get().getAddress(), "결제 취소", tid, payment.getPartner_user_id(), payment.getImage());
+    paymentJpaRepository.save(newPayment);
     // 성공 응답 반환
     return new KakaoPayCancelResponse(
-        payment.get().getProductName(),
+        payment.getProductName(),
         canceledAmount,
-        payment.get().getTid(),
+        payment.getTid(),
         "결제 취소", // 상태는 취소로 설정
         user.get().getNickName(),
         user.get().getEmail(),
