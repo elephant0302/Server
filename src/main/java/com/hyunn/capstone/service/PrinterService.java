@@ -12,7 +12,6 @@ import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
-import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.PaymentJpaRepository;
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,7 +38,6 @@ public class PrinterService {
   @Value("${printerServer.apiUri}")
   private String PrinterApiUri;
 
-  private final ImageJpaRepository imageJpaRepository;
   private final PaymentJpaRepository paymentJpaRepository;
   private final MessageService messageService;
 
@@ -67,6 +65,7 @@ public class PrinterService {
 
     // HttpHeaders 설정
     HttpHeaders headers = new HttpHeaders();
+    headers.set("x-api-key", xApiKey);
     headers.setContentType(MediaType.APPLICATION_JSON);
 
     // 요청 바디를 구성합니다.
