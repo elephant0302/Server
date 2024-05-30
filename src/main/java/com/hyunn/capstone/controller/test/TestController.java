@@ -2,9 +2,11 @@ package com.hyunn.capstone.controller.test;
 
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.entity.Image;
+import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
+import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,6 +37,7 @@ public class TestController {
 
   private final UserJpaRepository userJpaRepository;
   private final ImageJpaRepository imageJpaRepository;
+  private final PaymentJpaRepository paymentJpaRepository;
 
   @Operation(summary = "GET METHOD TEST", description = "GET 요청 테스트 API 입니다.")
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
@@ -117,7 +120,7 @@ public class TestController {
     List<Image> imageList = imageJpaRepository.findAll();
     // Image 엔티티를 ImageDto로 변환
     List<ImageDto> imageDtoList = imageList.stream()
-        .map(image -> new ImageDto(
+        .map(image -> ImageDto.create(
             image.getImageId(),
             image.getImage(),
             image.getThreeDimension(),
@@ -128,6 +131,32 @@ public class TestController {
         ))
         .collect(Collectors.toList());
     return ResponseEntity.ok(ApiStandardResponse.success(imageDtoList));
+  }
+
+  @Operation(summary = "Payment DB 조회", description = "Payment DB 확인 API 입니다.")
+  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
+      in = ParameterIn.HEADER, example = "testApiKey2024")
+  @GetMapping("/payments")
+  public ResponseEntity<ApiStandardResponse<List<PaymentDto>>> getPaymentDB(
+      @RequestHeader(value = "x-api-key", required = false) String apiKey) {
+    // API KEY 유효성 검사
+    if (apiKey == null || !apiKey.equals(xApiKey)) {
+      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
+    }
+    List<Payment> paymentList = paymentJpaRepository.findAll();
+    // Payment 엔티티를 PaymentDto로 변환
+    List<PaymentDto> paymentDtoList = paymentList.stream()
+        .map(payment -> PaymentDto.create(
+            payment.getPaymentId(),
+            payment.getProductName(),
+            payment.getPrice(),
+            payment.getAddress(),
+            payment.getShipping(),
+            payment.getTid(),
+            payment.getImage().getImageId()
+        ))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(ApiStandardResponse.success(paymentDtoList));
   }
 
 }

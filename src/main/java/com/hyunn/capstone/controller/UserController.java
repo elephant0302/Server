@@ -2,6 +2,7 @@ package com.hyunn.capstone.controller;
 
 import com.hyunn.capstone.dto.request.UserRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
+import com.hyunn.capstone.dto.response.PaymentResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -190,6 +191,44 @@ public class UserController {
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
       @Valid @RequestBody UserRequest userRequest) {
     List<ThreeDimensionResponse> images = userService.findImagesByUser(apiKey, userRequest);
+    return ResponseEntity.ok(ApiStandardResponse.success(images));
+  }
+
+  @Operation(summary = "결제 내역 조회", description = "해당 유저의 결제 내역을 조회한다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "결제 내역 성공"),
+      @ApiResponse(responseCode = "400",
+          description = "1. 파라미터가 부족합니다. \t\n"
+              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
+              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
+              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
+                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
+                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
+      @ApiResponse(responseCode = "404",
+          description = "1. Api 응답이 올바르지 않습니다. \t\n"
+              + "2. 유저를 찾지 못했습니다.",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.class),
+              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
+                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
+                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
+  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
+      in = ParameterIn.HEADER, example = "testApiKey2024")
+  @PostMapping("/payments")
+  public ResponseEntity<ApiStandardResponse<List<PaymentResponse>>> findPaymentByUser(
+      @RequestHeader(value = "x-api-key", required = false) String apiKey,
+      @Valid @RequestBody UserRequest userRequest) {
+    List<PaymentResponse> images = userService.findPaymentByUser(apiKey, userRequest);
     return ResponseEntity.ok(ApiStandardResponse.success(images));
   }
 

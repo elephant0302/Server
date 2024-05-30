@@ -1,6 +1,5 @@
 package com.hyunn.capstone.controller.test;
 
-import com.hyunn.capstone.entity.User;
 import lombok.Getter;
 
 @Getter
