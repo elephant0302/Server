@@ -54,7 +54,8 @@ public class Payment extends BaseEntity {
   @JoinColumn(name = "image_id")
   private Image image;
 
-  private Payment(String productName, Integer price, String address, String Shipping, String tid, String partner_user_id, Image image) {
+  private Payment(String productName, Integer price, String address, String Shipping, String tid,
+      String partner_user_id, Image image) {
     this.productName = productName;
     this.price = price;
     this.address = address;

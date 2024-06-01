@@ -50,7 +50,9 @@ public class KakaoPayCancelResponse {
   @Schema(description = "휴대폰 번호")
   private String phoneNumber;
 
-  public KakaoPayCancelResponse(String productName, CanceledAmount canceledAmount, String tid, String status, String userNickname, String userEmail, LocalDateTime canceledAt, String phoneNumber) {
+  public KakaoPayCancelResponse(String productName, CanceledAmount canceledAmount, String tid,
+      String status, String userNickname, String userEmail, LocalDateTime canceledAt,
+      String phoneNumber) {
     this.productName = productName;
     this.canceledAmount = canceledAmount;
     this.tid = tid;
@@ -61,7 +63,10 @@ public class KakaoPayCancelResponse {
     this.phoneNumber = phoneNumber;
   }
 
-  public static KakaoPayCancelResponse create(String productName, CanceledAmount canceledAmount, String tid, String status, String userNickname, String userEmail, LocalDateTime canceledAt, String phoneNumber) {
-    return new KakaoPayCancelResponse(productName, canceledAmount, tid, status, userNickname, userEmail, canceledAt, phoneNumber);
+  public static KakaoPayCancelResponse create(String productName, CanceledAmount canceledAmount,
+      String tid, String status, String userNickname, String userEmail, LocalDateTime canceledAt,
+      String phoneNumber) {
+    return new KakaoPayCancelResponse(productName, canceledAmount, tid, status, userNickname,
+        userEmail, canceledAt, phoneNumber);
   }
 }

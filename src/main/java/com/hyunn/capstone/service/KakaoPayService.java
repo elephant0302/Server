@@ -217,7 +217,6 @@ public class KakaoPayService {
       throw new RootUserException("해당 유저는 루트 유저로써 해당 기능을 수행할 수 없습니다.");
     }
 
-
     Optional<Image> image = Optional.ofNullable(
         imageJpaRepository.findById(kakaoPayReadyResponse.getImageId())
             .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
@@ -292,7 +291,7 @@ public class KakaoPayService {
     canceledAmount.setTaxFree(responseJson.get("canceled_amount").get("tax_free").asInt());
     canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
 // 마이너스로 가격 설정
-    Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice()*-1,
+    Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice() * -1,
         user.get().getAddress(), "결제 취소", tid, payment.getPartner_user_id(), payment.getImage());
     paymentJpaRepository.save(newPayment);
     // 성공 응답 반환
