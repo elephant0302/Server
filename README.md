@@ -53,7 +53,7 @@
 │               │   │   ├── ImageRequest
 │               │   │   ├── KakaoPayReadyRequest
 │               │   │   ├── MessageRequest
-│               │   │   ├── ThreeDimensionCreateRequest
+│               │   │   ├── ThreeDimensionRequest
 │               │   │   └── UserRequest
 │               │   └── Response
 │               │   │   ├── ApiStandardResponse
@@ -63,7 +63,6 @@
 │               │   │   ├── KakaoPayReadyResponse
 │               │   │   ├── MessageRespnose
 │               │   │   ├── PaymentResponse
-│               │   │   ├── ThreeDimesionCreateResponse
 │               │   │   ├── ThreeDimesionResponse
 │               │   │   └── UserResponse
 │               ├── entity

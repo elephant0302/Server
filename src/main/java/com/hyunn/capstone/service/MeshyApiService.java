@@ -5,14 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hyunn.capstone.dto.request.ThreeDimensionCreateRequest;
-import com.hyunn.capstone.dto.response.ThreeDimensionCreateResponse;
+import com.hyunn.capstone.dto.request.ThreeDimensionRequest;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
@@ -47,9 +45,9 @@ public class MeshyApiService {
    * text_to_3d
    */
   @Transactional
-  public ThreeDimensionCreateResponse textTo3D(String apiKey, String keyWord,
-      ThreeDimensionCreateRequest threeDimensionCreateRequest)
-      throws JsonProcessingException {
+  public ThreeDimensionResponse textTo3D(String apiKey, String keyWord,
+      ThreeDimensionRequest threeDimensionRequest)
+      throws JsonProcessingException, InterruptedException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
@@ -58,9 +56,9 @@ public class MeshyApiService {
     Optional<User> rootUser = Optional.ofNullable(userJpaRepository.findById(1L)
         .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    String image = threeDimensionCreateRequest.getImage();
-    String gender = threeDimensionCreateRequest.getGender();
-    String emotion = threeDimensionCreateRequest.getEmotion();
+    String image = threeDimensionRequest.getImage();
+    String gender = threeDimensionRequest.getGender();
+    String emotion = threeDimensionRequest.getEmotion();
 
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
@@ -111,23 +109,28 @@ public class MeshyApiService {
     JsonNode responseJson = mapper.readTree(responseBody);
     String previewResult = responseJson.get("result").asText();
 
+    // 3D 모델까지 시간이 걸리므로 올바른 값을 받아올 때까지 반복
+    String obj = null;
+    while (true) {
+      obj = return3D(previewResult);
+      if (obj != null) {
+        break;
+      }
+      Thread.sleep(10000); // 10초 대기
+    }
+
     // 루트 유저에게 일단 할당
-    Image newImage = Image.createImage(image, previewResult, keyWord, emotion, gender,
-        rootUser.get());
+    Image newImage = Image.createImage(image, obj, keyWord, emotion, gender, rootUser.get());
     imageJpaRepository.save(newImage);
-    return ThreeDimensionCreateResponse.create(newImage.getImageId(), newImage.getThreeDimension(),
-        newImage.getKeyWord());
+    return ThreeDimensionResponse.create(newImage.getImageId(), newImage.getImage(),
+        newImage.getThreeDimension(), newImage.getKeyWord());
   }
 
   /**
    * 3D 모델 반환
    */
   @Transactional
-  public ThreeDimensionResponse return3D(String apiKey, String preview_result) {
-    // API KEY 유효성 검사
-    if (apiKey == null || !apiKey.equals(xApiKey)) {
-      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
-    }
+  public String return3D(String preview_result) {
 
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
@@ -166,35 +169,12 @@ public class MeshyApiService {
 
     JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
     String status = jsonObject.get("status").getAsString();
-    String progress = jsonObject.get("progress").getAsString();
-    String keyWord = jsonObject.get("prompt").getAsString(); // 키워드
 
-    // 응답값 설정
-    String message = null; // 퍼센트 or 3D 이미지
-    Long userId = 1L;
-    String image = null;
-
-    if (status.equals("IN_PROGRESS")) {
-      message = "progress : " + progress + "%";
-    } else if (status.equals("SUCCEEDED")) {
-      message = jsonObject.getAsJsonObject("model_urls").get("obj")
-          .getAsString();
-
-      // image 임시키로 쓰이던 preview_result를 3D url로 수정
-      Optional<Image> existImage = Optional.ofNullable(
-          imageJpaRepository.findImageByThreeDimension(preview_result)
-              .orElseThrow(() -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")));
-
-      Image targetImage = existImage.get();
-      targetImage.update3D(message);
-      imageJpaRepository.save(targetImage);
-
-      userId = targetImage.getImageId();
-      image = targetImage.getImage();
-      message = targetImage.getThreeDimension();
+    String obj = null;
+    if (status.equals("SUCCEEDED")) {
+      obj = jsonObject.getAsJsonObject("model_urls").get("obj").getAsString();
     }
-
-    return ThreeDimensionResponse.create(userId, image, message, keyWord);
+    return obj;
   }
 
   /**
