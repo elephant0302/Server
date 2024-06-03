@@ -1,7 +1,7 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.request.ThreeDimensionCreateRequest;
+import com.hyunn.capstone.dto.request.ThreeDimensionRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ImageToTextResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
@@ -127,10 +127,10 @@ public class ImageController {
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
       @Parameter(description = "닮은 동물 키워드", required = true, example = "dog")
       @PathVariable String keyWord,
-      @Valid @RequestBody ThreeDimensionCreateRequest threeDimensionCreateRequest)
+      @Valid @RequestBody ThreeDimensionRequest threeDimensionRequest)
       throws JsonProcessingException, InterruptedException {
     ThreeDimensionResponse threeDimensionResponse = meshyApiService.textTo3D(
-        apiKey, keyWord, threeDimensionCreateRequest);
+        apiKey, keyWord, threeDimensionRequest);
     return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
   }
 

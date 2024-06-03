@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hyunn.capstone.dto.request.ThreeDimensionCreateRequest;
+import com.hyunn.capstone.dto.request.ThreeDimensionRequest;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
@@ -46,7 +46,7 @@ public class MeshyApiService {
    */
   @Transactional
   public ThreeDimensionResponse textTo3D(String apiKey, String keyWord,
-      ThreeDimensionCreateRequest threeDimensionCreateRequest)
+      ThreeDimensionRequest threeDimensionRequest)
       throws JsonProcessingException, InterruptedException {
     // API KEY 유효성 검사
     if (apiKey == null || !apiKey.equals(xApiKey)) {
@@ -56,9 +56,9 @@ public class MeshyApiService {
     Optional<User> rootUser = Optional.ofNullable(userJpaRepository.findById(1L)
         .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    String image = threeDimensionCreateRequest.getImage();
-    String gender = threeDimensionCreateRequest.getGender();
-    String emotion = threeDimensionCreateRequest.getEmotion();
+    String image = threeDimensionRequest.getImage();
+    String gender = threeDimensionRequest.getGender();
+    String emotion = threeDimensionRequest.getEmotion();
 
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
