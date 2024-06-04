@@ -50,7 +50,8 @@ public class KakaoPayExceptionHandler {
   // 결제 정보를 찾을 수 없는 경우
   @ExceptionHandler(PaymentNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handlePaymentNotFoundException(PaymentNotFoundException e) {
+  public ApiStandardResponse<ErrorResponse> handlePaymentNotFoundException(
+      PaymentNotFoundException e) {
     log.error("", e);
 
     final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());

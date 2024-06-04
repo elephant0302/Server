@@ -41,7 +41,7 @@ public class ImageToTextResponse {
   }
 
   public static ImageToTextResponse create(String image, String gender, String emotion,
-      Map keyWord,  String title, String example) {
+      Map keyWord, String title, String example) {
     return new ImageToTextResponse(image, gender, emotion, keyWord, title, example);
   }
 }

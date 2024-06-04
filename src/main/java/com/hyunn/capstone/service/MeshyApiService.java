@@ -128,9 +128,12 @@ public class MeshyApiService {
 
     // JsonObject를 Map<String, String> 변환
     ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, String> modelUrlsMap = objectMapper.readValue(modelUrls.toString(), new TypeReference<Map<String, String>>() {});
+    Map<String, String> modelUrlsMap = objectMapper.readValue(modelUrls.toString(),
+        new TypeReference<Map<String, String>>() {
+        });
 
-    return MeshyAPIResponse.create(newImage.getImageId(), newImage.getImage(), modelUrlsMap, newImage.getKeyWord());
+    return MeshyAPIResponse.create(newImage.getImageId(), newImage.getImage(), modelUrlsMap,
+        newImage.getKeyWord());
   }
 
   /**

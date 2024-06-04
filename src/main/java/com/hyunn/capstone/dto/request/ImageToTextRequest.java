@@ -21,6 +21,6 @@ public class ImageToTextRequest {
   }
 
   public static ImageToTextRequest create(String gender, String emotion) {
-    return new ImageToTextRequest( gender, emotion);
+    return new ImageToTextRequest(gender, emotion);
   }
 }

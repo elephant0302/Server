@@ -41,7 +41,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class, OpenAIController.class})
+@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class,
+    OpenAIController.class})
 public class ImageExceptionHandler {
 
   // API 응답이 올바르지 않은 경우

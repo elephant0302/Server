@@ -2,7 +2,6 @@ package com.hyunn.capstone.service;
 
 import com.hyunn.capstone.dto.request.UserRequest;
 import com.hyunn.capstone.dto.response.PaymentResponse;
-import com.hyunn.capstone.dto.response.MeshyAPIResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
