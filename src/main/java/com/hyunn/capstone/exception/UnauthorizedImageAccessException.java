@@ -6,5 +6,7 @@ public class UnauthorizedImageAccessException extends RuntimeException {
     super(msg);
   }
 
-  public ErrorStatus toErrorCode() {return ErrorStatus.UNAUTHORIZED_IMAGE_ACCESS_EXCEPTION;}
+  public ErrorStatus toErrorCode() {
+    return ErrorStatus.UNAUTHORIZED_IMAGE_ACCESS_EXCEPTION;
+  }
 }

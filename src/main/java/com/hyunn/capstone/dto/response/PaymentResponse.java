@@ -37,7 +37,8 @@ public class PaymentResponse {
   private String keyWord;
 
   private PaymentResponse(Long paymentId, String productName, Integer price, String address,
-      String Shipping, String tid, Long imageId, String image, String threeDimension, String keyWord) {
+      String Shipping, String tid, Long imageId, String image, String threeDimension,
+      String keyWord) {
     this.paymentId = paymentId;
     this.productName = productName;
     this.price = price;
@@ -53,7 +54,8 @@ public class PaymentResponse {
   public static PaymentResponse create(Long paymentId, String productName, Integer price,
       String address, String Shipping, String tid, Long imageId, String image,
       String threeDimension, String keyWord) {
-    return new PaymentResponse(paymentId, productName, price, address, Shipping, tid, imageId, image,
+    return new PaymentResponse(paymentId, productName, price, address, Shipping, tid, imageId,
+        image,
         threeDimension, keyWord);
   }
 

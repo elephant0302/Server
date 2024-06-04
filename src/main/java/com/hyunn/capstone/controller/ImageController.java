@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hyunn.capstone.dto.request.ThreeDimensionRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ImageToTextResponse;
-import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
+import com.hyunn.capstone.dto.response.MeshyAPIResponse;
 import com.hyunn.capstone.service.ImageService;
 import com.hyunn.capstone.service.MeshyApiService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -92,7 +92,7 @@ public class ImageController {
     return ResponseEntity.ok(ApiStandardResponse.success(imageToTextResponse));
   }
 
-  @Operation(summary = "3D 모델 생성 (유료)", description = "3D 모델을 반환한다. (약 1~2분 소요)")
+  @Operation(summary = "3D 모델 생성 (유료)", description = "3D 모델을 반환한다. (약 2분 소요)")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "3D 모델 반환"),
       @ApiResponse(responseCode = "400",
@@ -123,15 +123,15 @@ public class ImageController {
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testApiKey2024")
   @PostMapping("/text_to_3D/{keyWord}")
-  public ResponseEntity<ApiStandardResponse<ThreeDimensionResponse>> textTo3D(
+  public ResponseEntity<ApiStandardResponse<MeshyAPIResponse>> textTo3D(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
       @Parameter(description = "닮은 동물 키워드", required = true, example = "dog")
       @PathVariable String keyWord,
       @Valid @RequestBody ThreeDimensionRequest threeDimensionRequest)
       throws JsonProcessingException, InterruptedException {
-    ThreeDimensionResponse threeDimensionResponse = meshyApiService.textTo3D(
+    MeshyAPIResponse meshyAPIResponse = meshyApiService.textTo3D(
         apiKey, keyWord, threeDimensionRequest);
-    return ResponseEntity.ok(ApiStandardResponse.success(threeDimensionResponse));
+    return ResponseEntity.ok(ApiStandardResponse.success(meshyAPIResponse));
   }
 
 
