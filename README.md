@@ -62,6 +62,7 @@
 │               │   │   ├── ImageToTextResponse
 │               │   │   ├── KakaoPayApproveResponse
 │               │   │   ├── KakaoPayReadyResponse
+│               │   │   ├── MeshyAPIResponse
 │               │   │   ├── MessageRespnose
 │               │   │   ├── PaymentResponse
 │               │   │   ├── ThreeDimesionResponse
