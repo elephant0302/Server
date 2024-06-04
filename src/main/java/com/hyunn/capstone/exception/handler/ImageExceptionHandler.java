@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.config.AmazonS3Config;
 import com.hyunn.capstone.controller.ImageController;
+import com.hyunn.capstone.controller.OpenAIController;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ErrorResponse;
 import com.hyunn.capstone.exception.ApiNotFoundException;
@@ -40,7 +41,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class})
+@RestControllerAdvice(assignableTypes = {ImageController.class, AmazonS3Config.class, OpenAIController.class})
 public class ImageExceptionHandler {
 
   // API 응답이 올바르지 않은 경우
