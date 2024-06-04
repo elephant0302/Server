@@ -69,7 +69,8 @@ public class MeshyApiService {
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("mode", "preview");
-    String prompt = "3D model of " + "(" + gender + ") " + keyWord + ", " + emotion + ", " + "detailed, cartoon style, only face";
+    String prompt = "3D model of " + "(" + gender + ") " + keyWord + ", " + emotion + ", "
+        + "detailed, cartoon style, only face";
     requestBody.put("prompt", prompt);
 
     String artStyle = "cartoon";
