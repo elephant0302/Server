@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "3D image api (openAI)", description = "3D 이미지 API by openAI")
+@Tag(name = "3D image api (논문용)", description = "3D 이미지 API by openAI")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/image/openai")
