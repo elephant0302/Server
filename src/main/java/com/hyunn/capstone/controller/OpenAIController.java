@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/image/openai")
-public class openAIController {
+public class OpenAIController {
 
   private final OpenAIService openAIService;
 
