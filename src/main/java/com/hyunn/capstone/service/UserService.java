@@ -2,6 +2,7 @@ package com.hyunn.capstone.service;
 
 import com.hyunn.capstone.dto.request.UserRequest;
 import com.hyunn.capstone.dto.response.PaymentResponse;
+import com.hyunn.capstone.dto.response.MeshyAPIResponse;
 import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
@@ -10,7 +11,6 @@ import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
-import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
 import java.util.List;
 import java.util.Optional;

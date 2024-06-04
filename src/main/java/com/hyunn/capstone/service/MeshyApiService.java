@@ -1,12 +1,13 @@
 package com.hyunn.capstone.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hyunn.capstone.dto.request.ThreeDimensionRequest;
-import com.hyunn.capstone.dto.response.ThreeDimensionResponse;
+import com.hyunn.capstone.dto.response.MeshyAPIResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.User;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
@@ -45,7 +46,7 @@ public class MeshyApiService {
    * text_to_3d
    */
   @Transactional
-  public ThreeDimensionResponse textTo3D(String apiKey, String keyWord,
+  public MeshyAPIResponse textTo3D(String apiKey, String keyWord,
       ThreeDimensionRequest threeDimensionRequest)
       throws JsonProcessingException, InterruptedException {
     // API KEY 유효성 검사
@@ -111,27 +112,32 @@ public class MeshyApiService {
     String previewResult = responseJson.get("result").asText();
 
     // 3D 모델까지 시간이 걸리므로 올바른 값을 받아올 때까지 반복
-    String obj = null;
+    JsonObject modelUrls = null;
     while (true) {
-      obj = return3D(previewResult);
-      if (obj != null) {
+      modelUrls = return3D(previewResult);
+      if (modelUrls != null) {
         break;
       }
       Thread.sleep(10000); // 10초 대기
     }
 
     // 루트 유저에게 일단 할당
+    String obj = modelUrls.get("obj").getAsString();
     Image newImage = Image.createImage(image, obj, keyWord, emotion, gender, rootUser.get());
     imageJpaRepository.save(newImage);
-    return ThreeDimensionResponse.create(newImage.getImageId(), newImage.getImage(),
-        newImage.getThreeDimension(), newImage.getKeyWord());
+
+    // JsonObject를 Map<String, String> 변환
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, String> modelUrlsMap = objectMapper.readValue(modelUrls.toString(), new TypeReference<Map<String, String>>() {});
+
+    return MeshyAPIResponse.create(newImage.getImageId(), newImage.getImage(), modelUrlsMap, newImage.getKeyWord());
   }
 
   /**
    * 3D 모델 반환
    */
   @Transactional
-  public String return3D(String preview_result) {
+  public JsonObject return3D(String preview_result) {
 
     String apiUri = "https://api.meshy.ai/v2/text-to-3d";
     RestTemplate restTemplate = new RestTemplate();
@@ -171,11 +177,10 @@ public class MeshyApiService {
     JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
     String status = jsonObject.get("status").getAsString();
 
-    String obj = null;
     if (status.equals("SUCCEEDED")) {
-      obj = jsonObject.getAsJsonObject("model_urls").get("mtl").getAsString();
+      return jsonObject.getAsJsonObject("model_urls");
     }
-    return obj;
+    return null;
   }
 
   /**
