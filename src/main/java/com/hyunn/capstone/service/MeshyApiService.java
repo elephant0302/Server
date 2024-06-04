@@ -69,13 +69,13 @@ public class MeshyApiService {
     // 요청 바디를 구성합니다.
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put("mode", "preview");
-    requestBody.put("prompt", keyWord);
+    String prompt = "3D model of " + "(" + gender + ") " + keyWord + ", " + emotion + ", " + "detailed, cartoon style, only face";
+    requestBody.put("prompt", prompt);
 
-    String artStyle = "realistic";
+    String artStyle = "cartoon";
     requestBody.put("art_style", artStyle);
 
-    // 프롬포트는 추가적인 수정이 필요함.
-    String negativePrompt = gender + ", " + emotion + ", toy";
+    String negativePrompt = "low quality, ugly";
     requestBody.put("negative_prompt", negativePrompt);
 
     // HttpEntity를 생성합니다.
