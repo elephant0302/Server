@@ -46,6 +46,7 @@
 │               │   ├── KakaoLoginController
 │               │   ├── KakaoPayController
 │               │   ├── MessageController
+│               │   ├── OpenAIController
 │               │   ├── PrinterController
 │               │   └── UserController
 │               ├── dto
@@ -102,6 +103,7 @@
 │                   ├── KakaoPayService
 │                   ├── MeshyApiService
 │                   ├── MessageService
+│                   ├── OpenAIService
 │                   ├── PrinterService
 │                   └── UserService
 └── test
