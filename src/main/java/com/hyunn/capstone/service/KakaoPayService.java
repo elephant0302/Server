@@ -3,7 +3,6 @@ package com.hyunn.capstone.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hyunn.capstone.dto.request.KakaoPayCancelRequest;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
 import com.hyunn.capstone.dto.response.KakaoPayCancelResponse;
@@ -20,14 +19,10 @@ import java.util.Map;
 import java.util.Optional;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
-import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -290,10 +285,16 @@ public class KakaoPayService {
     canceledAmount.setTotal(responseJson.get("canceled_amount").get("total").asInt());
     canceledAmount.setTaxFree(responseJson.get("canceled_amount").get("tax_free").asInt());
     canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
-// 마이너스로 가격 설정
+    // 마이너스로 가격 설정
     Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice() * -1,
         user.get().getAddress(), "결제 취소", tid, payment.getPartner_user_id(), payment.getImage());
     paymentJpaRepository.save(newPayment);
+    // 이미지에서 결제 정보 제거
+    Image image = imageJpaRepository.findById(payment.getImage().getImageId()).orElseThrow(
+        () -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")
+    );
+    image.disconnectPayment();
+    imageJpaRepository.save(image);
     // 성공 응답 반환
     return new KakaoPayCancelResponse(
         payment.getProductName(),

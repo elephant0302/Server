@@ -83,4 +83,6 @@ public class Image extends BaseEntity {
     this.payment = payment;
   }
 
+  public void disconnectPayment() { this.payment = null; }
+
 }
