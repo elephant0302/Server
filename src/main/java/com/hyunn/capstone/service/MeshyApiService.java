@@ -76,7 +76,7 @@ public class MeshyApiService {
     String artStyle = "cartoon";
     requestBody.put("art_style", artStyle);
 
-    String negativePrompt = "low quality, ugly";
+    String negativePrompt = "ugly, low quality";
     requestBody.put("negative_prompt", negativePrompt);
 
     // HttpEntity를 생성합니다.
@@ -173,7 +173,7 @@ public class MeshyApiService {
 
     String obj = null;
     if (status.equals("SUCCEEDED")) {
-      obj = jsonObject.getAsJsonObject("model_urls").get("obj").getAsString();
+      obj = jsonObject.getAsJsonObject("model_urls").get("mtl").getAsString();
     }
     return obj;
   }
