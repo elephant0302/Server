@@ -10,7 +10,6 @@ import static com.hyunn.capstone.exception.ErrorStatus.VALIDATION_EXCEPTION;
 import com.hyunn.capstone.controller.KakaoPayController;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.ErrorResponse;
-import com.hyunn.capstone.exception.AlreadyRefundedException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.PaymentNotFoundException;
@@ -175,16 +174,6 @@ public class KakaoPayExceptionHandler {
       UnauthorizedImageAccessException e) {
     ErrorResponse errorResponse = ErrorResponse.create(UNAUTHORIZED_IMAGE_ACCESS_EXCEPTION,
         "해당 유저가 소유하고 있는 이미지가 아닙니다.");
-    return ApiStandardResponse.fail(errorResponse);
-  }
-
-  // 이미 환불된 결제일 경우
-  @ExceptionHandler(AlreadyRefundedException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ApiStandardResponse<ErrorResponse> handleAlreadyRefundedException(
-      AlreadyRefundedException e) {
-    log.error("", e);
-    final ErrorResponse errorResponse = ErrorResponse.create(e.toErrorCode(), e.getMessage());
     return ApiStandardResponse.fail(errorResponse);
   }
 

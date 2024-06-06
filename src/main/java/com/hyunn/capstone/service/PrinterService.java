@@ -45,10 +45,10 @@ public class PrinterService {
    * 3D 프린터 서버에 obj 전송
    */
   @Transactional
-  public String sendObj(Image image, Payment payment) throws JsonProcessingException {
+  public String sendObj(Image image) throws JsonProcessingException {
     String obj = image.getThreeDimension();
     Long userId = image.getUser().getUserId();
-    Long paymentId = payment.getPaymentId();
+    Long paymentId = image.getPayment().getPaymentId();
 
     // 결제 정보 검사
     if (!paymentJpaRepository.existsById(paymentId)) {

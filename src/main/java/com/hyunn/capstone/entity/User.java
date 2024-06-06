@@ -41,6 +41,7 @@ public class User extends BaseEntity {
   @Column(name = "access_token")
   private String accessToken;
 
+
   private User(String nickName, String email, String phone, String address, String accessToken) {
     this.nickName = nickName;
     this.email = email;
