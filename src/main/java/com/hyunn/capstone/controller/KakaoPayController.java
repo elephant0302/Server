@@ -1,11 +1,9 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.request.KakaoPayCancelRequest;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
-import com.hyunn.capstone.dto.response.KakaoPayCancelResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.service.KakaoPayService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -24,14 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 @Tag(name = "kakaopay api", description = "카카오페이 api")
 @Controller
@@ -68,7 +64,8 @@ public class KakaoPayController {
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 유저를 찾지 못했습니다. \t\n"
-              + "3. 이미지를 찾지 못했습니다.",
+              + "3. 이미지를 찾지 못했습니다. \t\n"
+              + "4. 결제 정보를 찾지 못했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -95,51 +92,5 @@ public class KakaoPayController {
     KakaoPayApproveResponse kakaoPayApproveResponse = kakaoPayService.getApprove(pgToken);
     return ResponseEntity.ok(ApiStandardResponse.success(kakaoPayApproveResponse));
   }
-
-
-  /**
-   * 결제 취소 요청
-   */
-  @Operation(summary = "결제 취소 요청", description = "이미 승인된 결제를 취소합니다.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "결제 취소 성공"),
-      @ApiResponse(responseCode = "400",
-          description = "1. 파라미터가 부족합니다. \t\n"
-              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
-              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
-              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
-                  + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "403",
-          description = "API KEY가 올바르지 않습니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
-                  + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
-      @ApiResponse(responseCode = "404",
-          description = "1. Api 응답이 올바르지 않습니다. \t\n"
-              + "2. 유저를 찾지 못했습니다. \t\n"
-              + "3. 이미지를 찾지 못했습니다. \t\n"
-              + "4. 이미 환불된 결제입니다.",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponse.class),
-              examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
-                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
-  @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
-      in = ParameterIn.HEADER, example = "testapikey1234")
-  @PostMapping("/cancel")
-  public ResponseEntity<ApiStandardResponse<KakaoPayCancelResponse>> cancelPayment(
-      @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @RequestParam("payment_id") Long paymentId
-  ) throws JsonProcessingException {
-    KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, paymentId);
-    return ResponseEntity.ok(ApiStandardResponse.success(cancelResponse));
-  }
-
 }
 

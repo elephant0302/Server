@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -42,39 +41,26 @@ public class Payment extends BaseEntity {
   @Column(name = "Shipping")
   private String Shipping;
 
-  // 결제 고유 번호
+  // 결제 정보
   @Column(name = "tid")
   private String tid;
-
-  // 전화번호
-  @Column(name = "partner_user_id")
-  private String partner_user_id;
 
   // 이미지와 1대1
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "image_id")
   private Image image;
 
-  // 어느 유저의 이미지 정보인가
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
-
-  private Payment(String productName, Integer price, String address, String Shipping, String tid,
-      String partner_user_id, Image image, User user) {
+  private Payment(String productName, Integer price, String address, String Shipping, Image image) {
     this.productName = productName;
     this.price = price;
     this.address = address;
     this.Shipping = Shipping;
-    this.tid = tid;
-    this.partner_user_id = partner_user_id;
     this.image = image;
-    this.user = user;
   }
 
   public static Payment createPayment(String productName, Integer price, String address,
-      String Shipping, String tid, String partner_user_id, Image image, User user) {
-    return new Payment(productName, price, address, Shipping, tid, partner_user_id, image, user);
+      String Shipping, Image image) {
+    return new Payment(productName, price, address, Shipping, image);
   }
 
   public void updateShipping(String Shipping) {

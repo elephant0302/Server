@@ -5,26 +5,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
-import com.hyunn.capstone.dto.response.KakaoPayCancelResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
-import com.hyunn.capstone.exception.AlreadyRefundedException;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
-import com.hyunn.capstone.exception.PaymentNotFoundException;
-import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import com.hyunn.capstone.exception.ImageNotFoundException;
 import com.hyunn.capstone.exception.RootUserException;
+import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import com.hyunn.capstone.exception.UserNotFoundException;
 import com.hyunn.capstone.repository.ImageJpaRepository;
 import com.hyunn.capstone.repository.PaymentJpaRepository;
 import com.hyunn.capstone.repository.UserJpaRepository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -35,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +50,6 @@ public class KakaoPayService {
 
   @Value("${spring.security.oauth2.client.kakaoPay.approve-uri}")
   private String approveUrl;
-
-  @Value("${spring.security.oauth2.client.kakaoPay.cancel-uri}")
-  private String cancelUrl;
 
   @Value("${spring.security.oauth2.client.kakaoPay.redirect_approval_url}")
   private String redirect_approval_url;
@@ -89,9 +81,8 @@ public class KakaoPayService {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    Optional<Image> image = Optional.ofNullable(
-        imageJpaRepository.findById(imageId)
-            .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
+    Optional<Image> image = Optional.ofNullable(imageJpaRepository.findById(imageId)
+        .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
@@ -109,7 +100,7 @@ public class KakaoPayService {
     params.put("partner_order_id", partner_order_id);
     params.put("partner_user_id", partner_user_id);
     params.put("item_name", kakaoPayReadyRequest.getItem_name());
-    params.put("quantity", 1);
+    params.put("quantity", kakaoPayReadyRequest.getQuantity());
     params.put("total_amount", kakaoPayReadyRequest.getTotal_amount());
     params.put("tax_free_amount", 0);
     params.put("approval_url", redirect_approval_url);
@@ -222,98 +213,16 @@ public class KakaoPayService {
     Image existImage = image.get();
 
     Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
-        user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(),
-        kakaoPayReadyResponse.getPartner_user_id(), existImage, user.get());
+        user.get().getAddress(), "결제 완료", existImage);
     paymentJpaRepository.save(payment);
+    existImage.connectPayment(payment);
+    imageJpaRepository.save(existImage);
 
     // 3D 프린터 서버에 요청 보내기
-    String message = printerService.sendObj(existImage, payment);
+    String message = printerService.sendObj(existImage);
 
     return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료",
         image.get().getImageId(), user.get().getNickName(), user.get().getEmail(),
-        payment.getDate(), user.get().getPhone(), message, payment.getPaymentId());
-
+        payment.getDate(), user.get().getPhone(), message);
   }
-
-  /**
-   * 카카오페이 결제 취소 단계
-   */
-  @Transactional
-  public KakaoPayCancelResponse cancelPayment(String apiKey, Long paymentId
-  ) throws JsonProcessingException {
-    if (apiKey == null || !apiKey.equals(xApiKey)) {
-      throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
-    }
-
-    // tid(결제 고유 번호)를 통해 결제 정보 조회
-    Optional<Payment> p = Optional.ofNullable(
-        paymentJpaRepository.findById(paymentId)
-            .orElseThrow(() -> new PaymentNotFoundException(
-                "payment_id를 통해 결제 정보를 찾을 수 없습니다.: " + paymentId)));
-    Payment payment = p.get();
-
-    List<Payment> payments = paymentJpaRepository.findAllByTid(p.get().getTid());
-    if (payments.size() > 1) {
-      throw new AlreadyRefundedException("이미 환불된 결제입니다.");
-    }
-
-    // 유저 정보 조회
-    Optional<User> user = Optional.ofNullable(
-        userJpaRepository.findUserByPhone(payment.getPartner_user_id())
-            .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
-
-    // 취소 요청 파라미터 설정
-    Map<String, Object> params = new HashMap<>();
-    params.put("cid", "TC0ONETIME");
-    params.put("tid", p.get().getTid());
-    params.put("cancel_amount", payment.getPrice());
-    params.put("cancel_tax_free_amount", 0);
-    params.put("cancel_available_amount", payment.getPrice());
-
-    // API 호출
-    RestTemplate restTemplate = new RestTemplate();
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", "SECRET_KEY " + admin_Key);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(params, headers);
-
-    ResponseEntity<String> response = restTemplate.exchange(
-        cancelUrl, HttpMethod.POST, requestEntity, String.class);
-
-    if (!response.getStatusCode().is2xxSuccessful()) {
-      throw new ApiNotFoundException("API 호출에 실패했습니다. 상태 코드: " + response.getStatusCode());
-    }
-
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode responseJson = mapper.readTree(response.getBody());
-
-    // 취소 금액 정보 파싱
-    KakaoPayCancelResponse.CanceledAmount canceledAmount = new KakaoPayCancelResponse.CanceledAmount();
-    canceledAmount.setTotal(responseJson.get("canceled_amount").get("total").asInt());
-    canceledAmount.setTaxFree(responseJson.get("canceled_amount").get("tax_free").asInt());
-    canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
-    // 마이너스로 가격 설정
-    Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice() * -1,
-        user.get().getAddress(), "결제 취소", p.get().getTid(), payment.getPartner_user_id(),
-        payment.getImage(), user.get());
-    paymentJpaRepository.save(newPayment);
-    // 이미지에서 결제 정보 제거
-    Image image = imageJpaRepository.findById(payment.getImage().getImageId()).orElseThrow(
-        () -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")
-    );
-
-    // 성공 응답 반환
-    return new KakaoPayCancelResponse(
-        payment.getProductName(),
-        canceledAmount,
-        payment.getTid(),
-        "결제 취소", // 상태는 취소로 설정
-        user.get().getNickName(),
-        user.get().getEmail(),
-        LocalDateTime.now(), // 취소 시간
-        user.get().getPhone()
-    );
-  }
-
 }
