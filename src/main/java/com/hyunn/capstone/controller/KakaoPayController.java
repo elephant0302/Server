@@ -68,8 +68,7 @@ public class KakaoPayController {
       @ApiResponse(responseCode = "404",
           description = "1. Api 응답이 올바르지 않습니다. \t\n"
               + "2. 유저를 찾지 못했습니다. \t\n"
-              + "3. 이미지를 찾지 못했습니다. \t\n"
-              + "4. 결제 정보를 찾지 못했습니다.",
+              + "3. 이미지를 찾지 못했습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
@@ -104,32 +103,41 @@ public class KakaoPayController {
   @Operation(summary = "결제 취소 요청", description = "이미 승인된 결제를 취소합니다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "결제 취소 성공"),
-      @ApiResponse(responseCode = "400", description = "올바르지 않은 요청 파라미터",
+      @ApiResponse(responseCode = "400",
+          description = "1. 파라미터가 부족합니다. \t\n"
+              + "2. 올바르지 않은 파라미터 값입니다. \t\n"
+              + "3. 올바르지 않은 JSON 형식입니다. \t\n"
+              + "4. 지원하지 않는 형식의 데이터 요청입니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"01\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"INVALID_PARAMETER\", "
                   + "\"msg\":\"올바르지 않은 파라미터 값입니다.\"} }"))),
-      @ApiResponse(responseCode = "403", description = "API KEY가 유효하지 않습니다.",
+      @ApiResponse(responseCode = "403",
+          description = "API KEY가 올바르지 않습니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"12\", \"msg\": \"fail\","
                   + " \"data\": {\"status\": \"AUTHENTICATION_EXCEPTION\", "
                   + "\"msg\":\"API KEY가 올바르지 않습니다.\"} }"))),
-      @ApiResponse(responseCode = "404", description = "결제 정보를 찾을 수 없습니다.",
+      @ApiResponse(responseCode = "404",
+          description = "1. Api 응답이 올바르지 않습니다. \t\n"
+              + "2. 유저를 찾지 못했습니다. \t\n"
+              + "3. 이미지를 찾지 못했습니다. \t\n"
+              + "4. 이미 환불된 결제입니다.",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.class),
               examples = @ExampleObject(value = "{ \"code\": \"10\", \"msg\": \"fail\","
-                  + " \"data\": {\"status\": \"NOT_FOUND\", "
-                  + "\"msg\":\"결제 정보를 찾을 수 없습니다.\"} }")))})
+                  + " \"data\": {\"status\": \"API_NOT_FOUND_EXCEPTION\", "
+                  + "\"msg\":\"Api 응답이 올바르지 않습니다.\"} }")))})
   @Parameter(name = "x-api-key", description = "x-api-key", schema = @Schema(type = "string"),
       in = ParameterIn.HEADER, example = "testapikey1234")
   @PostMapping("/cancel")
   public ResponseEntity<ApiStandardResponse<KakaoPayCancelResponse>> cancelPayment(
       @RequestHeader(value = "x-api-key", required = false) String apiKey,
-      @RequestParam("tid") String tid
+      @RequestParam("payment_id") Long paymentId
   ) throws JsonProcessingException {
-    KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, tid);
+    KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, paymentId);
     return ResponseEntity.ok(ApiStandardResponse.success(cancelResponse));
   }
 

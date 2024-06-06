@@ -51,9 +51,12 @@ public class KakaoPayApproveResponse {
   @Schema(description = "3D 프린터 서버에 대한 응답값")
   private String message;
 
+  @Schema(description = "결제 아이디")
+  private Long paymentId;
+
   public KakaoPayApproveResponse(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
-      LocalDateTime approvedAt, String phoneNumber, String message) {
+      LocalDateTime approvedAt, String phoneNumber, String message, Long paymentId) {
     this.productName = productName;
     this.amount = amount;
     this.address = address;
@@ -64,6 +67,7 @@ public class KakaoPayApproveResponse {
     this.approvedAt = approvedAt;
     this.phoneNumber = phoneNumber;
     this.message = message;
+    this.paymentId = paymentId;
   }
 
 
@@ -72,14 +76,14 @@ public class KakaoPayApproveResponse {
     amount.setTotal(0);  // Amount 객체의 total 필드를 0으로 초기화
 
     return new KakaoPayApproveResponse("null", amount, "null", "null", 0L, "null", "null",
-        LocalDateTime.now(), "null", "null");
+        LocalDateTime.now(), "null", "null", null);
   }
 
   public static KakaoPayApproveResponse create(String productName, Amount amount, String address,
       String shippingStatus, Long imageId, String userNickname, String userEmail,
-      LocalDateTime approvedAt, String phoneNumber, String message) {
+      LocalDateTime approvedAt, String phoneNumber, String message, Long paymentId) {
     return new KakaoPayApproveResponse(productName, amount, address, shippingStatus, imageId,
-        userNickname, userEmail, approvedAt, phoneNumber, message);
+        userNickname, userEmail, approvedAt, phoneNumber, message, paymentId);
   }
 }
 

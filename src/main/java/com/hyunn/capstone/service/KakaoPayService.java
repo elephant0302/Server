@@ -10,8 +10,10 @@ import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.entity.Image;
 import com.hyunn.capstone.entity.Payment;
 import com.hyunn.capstone.entity.User;
+import com.hyunn.capstone.exception.AlreadyRefundedException;
 import com.hyunn.capstone.exception.ApiKeyNotValidException;
 import com.hyunn.capstone.exception.ApiNotFoundException;
+import com.hyunn.capstone.exception.PaymentNotFoundException;
 import com.hyunn.capstone.exception.UnauthorizedImageAccessException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -86,8 +89,9 @@ public class KakaoPayService {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
     }
 
-    Optional<Image> image = Optional.ofNullable(imageJpaRepository.findById(imageId)
-        .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
+    Optional<Image> image = Optional.ofNullable(
+        imageJpaRepository.findById(imageId)
+            .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
@@ -219,17 +223,15 @@ public class KakaoPayService {
 
     Payment payment = Payment.createPayment(item_name, amount.getTotal().intValue(),
         user.get().getAddress(), "결제 완료", kakaoPayReadyResponse.getTid(),
-        kakaoPayReadyResponse.getPartner_user_id(), existImage);
+        kakaoPayReadyResponse.getPartner_user_id(), existImage, user.get());
     paymentJpaRepository.save(payment);
-    existImage.connectPayment(payment);
-    imageJpaRepository.save(existImage);
 
     // 3D 프린터 서버에 요청 보내기
-    String message = printerService.sendObj(existImage);
+    String message = printerService.sendObj(existImage, payment);
 
     return KakaoPayApproveResponse.create(item_name, amount, payment.getAddress(), "결제 완료",
         image.get().getImageId(), user.get().getNickName(), user.get().getEmail(),
-        payment.getDate(), user.get().getPhone(), message);
+        payment.getDate(), user.get().getPhone(), message, payment.getPaymentId());
 
   }
 
@@ -237,7 +239,7 @@ public class KakaoPayService {
    * 카카오페이 결제 취소 단계
    */
   @Transactional
-  public KakaoPayCancelResponse cancelPayment(String apiKey, String tid
+  public KakaoPayCancelResponse cancelPayment(String apiKey, Long paymentId
   ) throws JsonProcessingException {
     if (apiKey == null || !apiKey.equals(xApiKey)) {
       throw new ApiKeyNotValidException("API KEY가 올바르지 않습니다.");
@@ -245,10 +247,16 @@ public class KakaoPayService {
 
     // tid(결제 고유 번호)를 통해 결제 정보 조회
     Optional<Payment> p = Optional.ofNullable(
-        paymentJpaRepository.findByTid(tid)
-            .orElseThrow(() -> new ApiNotFoundException("tid를 통해 결제 정보를 찾을 수 없습니다.: " + tid)));
-
+        paymentJpaRepository.findById(paymentId)
+            .orElseThrow(() -> new PaymentNotFoundException(
+                "payment_id를 통해 결제 정보를 찾을 수 없습니다.: " + paymentId)));
     Payment payment = p.get();
+
+    List<Payment> payments = paymentJpaRepository.findAllByTid(p.get().getTid());
+    if (payments.size() > 1) {
+      throw new AlreadyRefundedException("이미 환불된 결제입니다.");
+    }
+
     // 유저 정보 조회
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhone(payment.getPartner_user_id())
@@ -257,7 +265,7 @@ public class KakaoPayService {
     // 취소 요청 파라미터 설정
     Map<String, Object> params = new HashMap<>();
     params.put("cid", "TC0ONETIME");
-    params.put("tid", tid);
+    params.put("tid", p.get().getTid());
     params.put("cancel_amount", payment.getPrice());
     params.put("cancel_tax_free_amount", 0);
     params.put("cancel_available_amount", payment.getPrice());
@@ -287,14 +295,14 @@ public class KakaoPayService {
     canceledAmount.setVat(responseJson.get("canceled_amount").get("vat").asInt());
     // 마이너스로 가격 설정
     Payment newPayment = Payment.createPayment(payment.getProductName(), payment.getPrice() * -1,
-        user.get().getAddress(), "결제 취소", tid, payment.getPartner_user_id(), payment.getImage());
+        user.get().getAddress(), "결제 취소", p.get().getTid(), payment.getPartner_user_id(),
+        payment.getImage(), user.get());
     paymentJpaRepository.save(newPayment);
     // 이미지에서 결제 정보 제거
     Image image = imageJpaRepository.findById(payment.getImage().getImageId()).orElseThrow(
         () -> new ImageNotFoundException("이미지 정보를 가져오지 못했습니다.")
     );
-    image.disconnectPayment();
-    imageJpaRepository.save(image);
+
     // 성공 응답 반환
     return new KakaoPayCancelResponse(
         payment.getProductName(),
