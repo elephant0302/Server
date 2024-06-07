@@ -11,4 +11,3 @@ public class ApiKeyNotValidException extends RuntimeException {
     return ErrorStatus.AUTHENTICATION_EXCEPTION;
   }
 }
-

@@ -78,4 +78,3 @@ public class GlobalExceptionHandler {
     return ApiStandardResponse.fail(errorResponse);
   }
 }
-

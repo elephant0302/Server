@@ -46,5 +46,3 @@ public class KakaoPayReadyResponse {
         partner_user_id, imageId);
   }
 }
-
-
