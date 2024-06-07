@@ -51,10 +51,6 @@ public class Image extends BaseEntity {
   @JoinColumn(name = "user_id")
   private User user;
 
-  // 결제 정보와 1대1
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "payment_id")
-  private Payment payment;
 
   private Image(String image, String threeDimension, String keyWord, String emotion,
       String gender, User user) {
@@ -73,14 +69,6 @@ public class Image extends BaseEntity {
 
   public void connectUser(User user) {
     this.user = user;
-  }
-
-  public void update3D(String threeDimension) {
-    this.threeDimension = threeDimension;
-  }
-
-  public void connectPayment(Payment payment) {
-    this.payment = payment;
   }
 
 }

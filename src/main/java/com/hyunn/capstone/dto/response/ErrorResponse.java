@@ -22,4 +22,3 @@ public class ErrorResponse {
     return new ErrorResponse(code, msg);
   }
 }
-
