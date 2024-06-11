@@ -93,6 +93,15 @@ public class KakaoPayService {
         imageJpaRepository.findById(imageId)
             .orElseThrow(() -> new ImageNotFoundException("이미지를 가져오지 못했습니다.")));
 
+    // 이미지의 최근 결제가 환불가 아니라면 오류
+    if (paymentJpaRepository.existsByImage(image.get())) {
+      Payment test = paymentJpaRepository.findTopByImageOrderByDateDesc(image.get()).get();
+      System.out.println(test);
+      if (test.getPrice() > 0) {
+        throw new PaymentNotFoundException("이미 결제 처리된 이미지입니다.");
+      }
+    }
+
     Optional<User> user = Optional.ofNullable(
         userJpaRepository.findUserByPhone(kakaoPayReadyRequest.getPartner_user_id())
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
@@ -100,9 +109,8 @@ public class KakaoPayService {
     if (image.get().getUser().getUserId() != user.get().getUserId()) {
       throw new UnauthorizedImageAccessException("해당 유저가 소유하고 있는 이미지가 아닙니다.");
     }
-    // 새로 만들기
-
     String partner_user_id = kakaoPayReadyRequest.getPartner_user_id();
+
     // 요청 바디를 구성합니다.
     Map<String, Object> params = new HashMap<>();
     params.put("cid", "TC0ONETIME");
@@ -249,7 +257,7 @@ public class KakaoPayService {
     Optional<Payment> p = Optional.ofNullable(
         paymentJpaRepository.findById(paymentId)
             .orElseThrow(() -> new PaymentNotFoundException(
-                "payment_id를 통해 결제 정보를 찾을 수 없습니다.: " + paymentId)));
+                "결제 정보를 찾을 수 없습니다.: " + paymentId)));
     Payment payment = p.get();
 
     List<Payment> payments = paymentJpaRepository.findAllByTid(p.get().getTid());

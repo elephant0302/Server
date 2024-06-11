@@ -73,17 +73,19 @@
     <p class="info">배송 상태: <span th:text="${response.shippingStatus}">Shipping Status</span></p>
     <p class="info">연락처: <span th:text="${response.phoneNumber}">Phone Number</span></p>
     <div class="button-container">
-      <button id="closeButton">닫기</button>
+      <button onclick="WinClose()">닫기</button>
     </div>
   </div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-  $(document).ready(function() {
-    $('#closeButton').click(function() {
-      window.open('','_self').close()
-    });
-  });
+  function WinClose(){
+    window.close();
+    self.close();
+    window.opener = window.location.href;
+    self.close();
+    window.open('about:blank', '_self').close();
+  }
 </script>
 </body>
 </html>
