@@ -36,6 +36,15 @@
 </head>
 <body>
 <div class="error-message">결제 중 예상치 못한 오류가 발생했습니다.<br>다시 시도해 주세요.</div>
-<button class="close-button" onclick="window.open('','_self').close()">닫기</button>
+<button class="close-button" onclick="WinClose()">닫기</button>
 </body>
+<script>
+  function WinClose(){
+    window.close();
+    self.close();
+    window.opener = window.location.href;
+    self.close();
+    window.open('about:blank', '_self').close();
+  }
+</script>
 </html>
