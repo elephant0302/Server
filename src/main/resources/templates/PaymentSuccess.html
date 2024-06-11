@@ -41,6 +41,9 @@
     .info span {
       font-weight: bold;
     }
+    .button-container {
+      text-align: right; /* 버튼 오른쪽 정렬 */
+    }
     button {
       background-color: #0057FF; /* 카카오페이 파란색 */
       color: white;
@@ -61,38 +64,24 @@
   <h1>결제 성공</h1>
   <div>
     <p class="info">상품명: <span th:text="${response.productName}">Product Name</span></p>
-    <p class="info">결제 금액: <span th:text="${response.amount.total}">Total Amount</span>원</p>
+    <p class="info">결제 금액: <span th:text="${response.amount.total}">Total Amount</span></p>
     <p class="info">결제 ID: <span th:text="${response.paymentId}">Payment ID</span></p>
-    <p class="info">승인 시간: <span th:text="${response.approvedAt}">Approval Time</span></p>
-    <p class="info">주문자 이메일: <span th:text="${response.userEmail}">User Email</span></p>
-    <p class="info">주문자 닉네임: <span th:text="${response.userNickname}">User Nickname</span></p>
-    <p class="info">배송지 주소: <span th:text="${response.address}">Shipping Address</span></p>
+    <p class="info">결제 시간: <span th:text="${response.approvedAt}">Approval Time</span></p>
+    <p class="info">이메일: <span th:text="${response.userEmail}">User Email</span></p>
+    <p class="info">닉네임: <span th:text="${response.userNickname}">User Nickname</span></p>
+    <p class="info">주소: <span th:text="${response.address}">Shipping Address</span></p>
     <p class="info">배송 상태: <span th:text="${response.shippingStatus}">Shipping Status</span></p>
     <p class="info">연락처: <span th:text="${response.phoneNumber}">Phone Number</span></p>
-    <p class="info">3D 프린터 응답: <span th:text="${response.message}">Printer Message</span></p>
-    <!-- 결제 취소 버튼, data-payment-id 속성에 결제 ID를 추가 -->
-    <button id="cancelButton" th:data-payment-id="${response.paymentId}">결제 취소</button>
+    <div class="button-container">
+      <button id="closeButton">닫기</button>
+    </div>
   </div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
   $(document).ready(function() {
-    $('#cancelButton').click(function() {
-      var paymentId = $(this).data('payment-id');  // 버튼의 data-payment-id 속성에서 결제 ID를 읽어옴
-      $.ajax({
-        url: '/api/payment/cancel',
-        type: 'POST',
-        data: {
-          payment_id: paymentId
-        },
-        success: function(response) {
-          alert('결제가 취소되었습니다.');
-          window.location.reload(); // 성공 후 페이지 리로드
-        },
-        error: function() {
-          alert('결제 취소에 실패하였습니다.');
-        }
-      });
+    $('#closeButton').click(function() {
+      window.close(); // 닫기 버튼 클릭 시 창 닫기
     });
   });
 </script>
