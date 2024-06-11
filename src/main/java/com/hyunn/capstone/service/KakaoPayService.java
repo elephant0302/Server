@@ -96,7 +96,6 @@ public class KakaoPayService {
     // 이미지의 최근 결제가 환불가 아니라면 오류
     if (paymentJpaRepository.existsByImage(image.get())) {
       Payment test = paymentJpaRepository.findTopByImageOrderByDateDesc(image.get()).get();
-      System.out.println(test);
       if (test.getPrice() > 0) {
         throw new PaymentNotFoundException("이미 결제 처리된 이미지입니다.");
       }
