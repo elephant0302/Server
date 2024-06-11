@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,7 +21,9 @@ public abstract class BaseEntity {
   private LocalDateTime date;
 
   BaseEntity() {
-    date = LocalDateTime.now();
+    // 한국 시간으로 설정
+    ZoneId koreaZoneId = ZoneId.of("Asia/Seoul");
+    date = ZonedDateTime.now(koreaZoneId).toLocalDateTime();
   }
 
 }

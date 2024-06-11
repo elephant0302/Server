@@ -73,7 +73,6 @@
     var approvedAtText = $('#approvedAt').text();
     if (approvedAtText) {
       var approvedAtDate = new Date(approvedAtText);
-      approvedAtDate.setHours(approvedAtDate.getHours() + 9);
       var year = approvedAtDate.getFullYear();
       var month = ('0' + (approvedAtDate.getMonth() + 1)).slice(-2);
       var day = ('0' + approvedAtDate.getDate()).slice(-2);
