@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Payment Success</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #FFEB00; /* 카카오페이 노란색 */
+      color: #3C1E1E; /* 카카오페이 검정색 */
+      margin: 0;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-width: 650px;
+      margin: 0 auto; /* 페이지 중앙 정렬 */
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+      margin: 10px 0;
+    }
+    .info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .info span {
+      font-weight: bold;
+    }
+    button {
+      background-color: #0057FF; /* 카카오페이 파란색 */
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0047E4; /* 버튼 호버 효과 */
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>결제 성공</h1>
+  <div>
+    <p class="info">상품명: <span th:text="${response.productName}">Product Name</span></p>
+    <p class="info">결제 금액: <span th:text="${response.amount.total}">Total Amount</span>원</p>
+    <p class="info">결제 ID: <span th:text="${response.paymentId}">Payment ID</span></p>
+    <p class="info">승인 시간: <span th:text="${response.approvedAt}">Approval Time</span></p>
+    <p class="info">주문자 이메일: <span th:text="${response.userEmail}">User Email</span></p>
+    <p class="info">주문자 닉네임: <span th:text="${response.userNickname}">User Nickname</span></p>
+    <p class="info">배송지 주소: <span th:text="${response.address}">Shipping Address</span></p>
+    <p class="info">배송 상태: <span th:text="${response.shippingStatus}">Shipping Status</span></p>
+    <p class="info">연락처: <span th:text="${response.phoneNumber}">Phone Number</span></p>
+    <p class="info">3D 프린터 응답: <span th:text="${response.message}">Printer Message</span></p>
+    <!-- 결제 취소 버튼, data-payment-id 속성에 결제 ID를 추가 -->
+    <button id="cancelButton" th:data-payment-id="${response.paymentId}">결제 취소</button>
+  </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#cancelButton').click(function() {
+      var paymentId = $(this).data('payment-id');  // 버튼의 data-payment-id 속성에서 결제 ID를 읽어옴
+      $.ajax({
+        url: '/api/payment/cancel',
+        type: 'POST',
+        data: {
+          payment_id: paymentId
+        },
+        success: function(response) {
+          alert('결제가 취소되었습니다.');
+          window.location.reload(); // 성공 후 페이지 리로드
+        },
+        error: function() {
+          alert('결제 취소에 실패하였습니다.');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

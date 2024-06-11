@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 
 @Tag(name = "kakaopay api", description = "카카오페이 api")
@@ -88,12 +89,12 @@ public class KakaoPayController {
     return ResponseEntity.ok(ApiStandardResponse.success(kakaoPayReadyResponse));
   }
 
-  @Hidden
   @GetMapping("/success")
-  public ResponseEntity<ApiStandardResponse<KakaoPayApproveResponse>> approvePayment(
-      @RequestParam("pg_token") String pgToken) throws JsonProcessingException {
+  public ModelAndView approvePayment(@RequestParam("pg_token") String pgToken) throws JsonProcessingException {
     KakaoPayApproveResponse kakaoPayApproveResponse = kakaoPayService.getApprove(pgToken);
-    return ResponseEntity.ok(ApiStandardResponse.success(kakaoPayApproveResponse));
+    ModelAndView modelAndView = new ModelAndView("paymentSuccess"); // paymentSuccess는 결제 성공을 보여줄 뷰의 이름입니다.
+    modelAndView.addObject("response", kakaoPayApproveResponse); // 뷰로 데이터 전달
+    return modelAndView;
   }
 
 
