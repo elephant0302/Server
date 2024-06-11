@@ -1,14 +1,12 @@
 package com.hyunn.capstone.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hyunn.capstone.dto.request.KakaoPayCancelRequest;
 import com.hyunn.capstone.dto.request.KakaoPayReadyRequest;
 import com.hyunn.capstone.dto.response.ApiStandardResponse;
 import com.hyunn.capstone.dto.response.KakaoPayApproveResponse;
 import com.hyunn.capstone.dto.response.KakaoPayCancelResponse;
 import com.hyunn.capstone.dto.response.KakaoPayReadyResponse;
 import com.hyunn.capstone.service.KakaoPayService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -24,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,9 +41,9 @@ public class KakaoPayController {
   @Value("${spring.security.oauth2.client.kakaoPay.client-id}")
   private String cid;
 
-  @Operation(summary = "결제 준비 요청", description = "결제 준비 단계, 사용자는 이 단계를 거쳐 결제 승인을 받습니다.")
+  @Operation(summary = "결제 요청", description = "결제 창을 제공되며 결제를 진행합니다.")
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "결제 준비 성공, 사용자는 결제 승인을 진행할 수 있습니다."),
+      @ApiResponse(responseCode = "200", description = "결제 창을 제공되며 결제를 진행합니다."),
       @ApiResponse(responseCode = "400",
           description = "1. 파라미터가 부족합니다. \t\n"
               + "2. 올바르지 않은 파라미터 값입니다. \t\n"
@@ -90,13 +87,13 @@ public class KakaoPayController {
   }
 
   @GetMapping("/success")
-  public ModelAndView approvePayment(@RequestParam("pg_token") String pgToken) throws JsonProcessingException {
+  public ModelAndView approvePayment(@RequestParam("pg_token") String pgToken)
+      throws JsonProcessingException {
     KakaoPayApproveResponse kakaoPayApproveResponse = kakaoPayService.getApprove(pgToken);
-    ModelAndView modelAndView = new ModelAndView("paymentSuccess"); // paymentSuccess는 결제 성공을 보여줄 뷰의 이름입니다.
+    ModelAndView modelAndView = new ModelAndView("PaymentSuccess");
     modelAndView.addObject("response", kakaoPayApproveResponse); // 뷰로 데이터 전달
     return modelAndView;
   }
-
 
   /**
    * 결제 취소 요청
@@ -140,6 +137,22 @@ public class KakaoPayController {
   ) throws JsonProcessingException {
     KakaoPayCancelResponse cancelResponse = kakaoPayService.cancelPayment(apiKey, paymentId);
     return ResponseEntity.ok(ApiStandardResponse.success(cancelResponse));
+  }
+
+  /**
+   * 결제 도중 취소 처리
+   */
+  @GetMapping("/cancel")
+  public String failPayment() {
+    return "PaymentFail";
+  }
+
+  /**
+   * 결제 도중 실패 처리
+   */
+  @GetMapping("/fail")
+  public String errorPayment() {
+    return "PaymentFail";
   }
 
 }
