@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Message</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .error-message {
+      font-size: 2em;
+      text-align: center;
+    }
+    .close-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .close-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div class="error-message">결제 중 예상치 못한 오류가 발생했습니다.<br>다시 시도해 주세요.</div>
+<button class="close-button" onclick="window.close()">닫기</button>
+</body>
+</html>
