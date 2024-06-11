@@ -58,7 +58,7 @@
     <p class="info">상품명: <span th:text="${response.productName}">Product Name</span></p>
     <p class="info">결제 금액: <span th:text="${response.amount.total}">Total Amount</span></p>
     <p class="info">결제 ID: <span th:text="${response.paymentId}">Payment ID</span></p>
-    <p class="info">결제 시간: <span th:text="${response.approvedAt}">Approval Time</span></p>
+    <p class="info">결제 시간: <span id="approvedAt" th:text="${response.approvedAt}">Approval Time</span></p>
     <p class="info">이메일: <span th:text="${response.userEmail}">User Email</span></p>
     <p class="info">닉네임: <span th:text="${response.userNickname}">User Nickname</span></p>
     <p class="info">주소: <span th:text="${response.address}">Shipping Address</span></p>
@@ -68,5 +68,22 @@
   <div class="close-message">창을 닫아주세요</div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    var approvedAtText = $('#approvedAt').text();
+    if (approvedAtText) {
+      var approvedAtDate = new Date(approvedAtText);
+      approvedAtDate.setHours(approvedAtDate.getHours() + 9);
+      var year = approvedAtDate.getFullYear();
+      var month = ('0' + (approvedAtDate.getMonth() + 1)).slice(-2);
+      var day = ('0' + approvedAtDate.getDate()).slice(-2);
+      var hours = ('0' + approvedAtDate.getHours()).slice(-2);
+      var minutes = ('0' + approvedAtDate.getMinutes()).slice(-2);
+      var seconds = ('0' + approvedAtDate.getSeconds()).slice(-2);
+      var formattedDate = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+      $('#approvedAt').text(formattedDate);
+    }
+  });
+</script>
 </body>
 </html>
