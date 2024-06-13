@@ -44,9 +44,6 @@ public class KakaoPayService {
   @Value("${spring.security.x-api-key}")
   private String xApiKey;
 
-  @Value("${spring.security.oauth2.client.kakaoPay.client-id}")
-  private String cid;
-
   @Value("${spring.security.oauth2.client.kakaoPay.client-secret}")
   private String admin_Key;
 
