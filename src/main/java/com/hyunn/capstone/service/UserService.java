@@ -136,7 +136,7 @@ public class UserService {
         userJpaRepository.findUserByPhoneAndEmail(phone, email)
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    List<Image> images = imageJpaRepository.findAllByUser(existUser);
+    List<Image> images = imageJpaRepository.findAllByUserOrderByDateDesc(existUser);
 
     // Entity에서 Dto로 변형
     List<ThreeDimensionResponse> imageResponses = images.stream()
@@ -164,7 +164,7 @@ public class UserService {
         userJpaRepository.findUserByPhoneAndEmail(phone, email)
             .orElseThrow(() -> new UserNotFoundException("유저 정보를 가져오지 못했습니다.")));
 
-    List<Payment> payments = paymentJpaRepository.findAllByUser(existUser);
+    List<Payment> payments = paymentJpaRepository.findAllByUserOrderByDateDesc(existUser);
 
     // Entity에서 Dto로 변형
     List<PaymentResponse> paymentResponses = payments.stream()

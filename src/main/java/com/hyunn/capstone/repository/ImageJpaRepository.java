@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ImageJpaRepository extends JpaRepository<Image, Long> {
 
-  List<Image> findAllByUser(Optional<User> user);
+  List<Image> findAllByUserOrderByDateDesc(Optional<User> user);
 
   List<Image> findAll();
 
