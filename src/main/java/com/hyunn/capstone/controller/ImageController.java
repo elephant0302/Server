@@ -131,8 +131,7 @@ public class ImageController {
       throws JsonProcessingException, InterruptedException {
     MeshyAPIResponse meshyAPIResponse = meshyApiService.textTo3D(
         apiKey, keyWord, threeDimensionRequest);
-    meshyAPIResponse.getThreeDimensionUrl().put("glb", "https://hyuntae-bucket.s3.ap-northeast-2.amazonaws.com/glb/%EA%B8%B0%EB%B6%84_%EC%A2%8B%EC%9D%80_%EA%B0%95%EC%95%84%EC%A7%80%EC%9D%98_%EC%96%BC%EA%B5%B4%EC%9D%84_%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98_0613140312_refine.glb"); // glb값 임의의로 변경
-    return ResponseEntity.ok(ApiStandardResponse.success(meshyAPIResponse));
+   return ResponseEntity.ok(ApiStandardResponse.success(meshyAPIResponse));
   }
 
 
