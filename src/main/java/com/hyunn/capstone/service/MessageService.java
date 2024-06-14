@@ -87,7 +87,7 @@ public class MessageService {
         + "\n" + nickName + "님이 주문하신 상품의 출력이 완료되었습니다. "
         + "\n순차적으로 배송을 시작합니다."
         + "\n더 많은 정보를 원하시면 아래 링크를 이용해주세요."
-        + "\n" + kakaoTalkRedirectUri;
+        + "\n" + "https://master--jrgb-3dprint.netlify.app";
     message.setText(text);
     try {
       javaMailSender.send(message);
