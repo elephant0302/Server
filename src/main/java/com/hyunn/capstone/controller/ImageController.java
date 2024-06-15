@@ -131,7 +131,7 @@ public class ImageController {
       throws JsonProcessingException, InterruptedException {
     MeshyAPIResponse meshyAPIResponse = meshyApiService.textTo3D(
         apiKey, keyWord, threeDimensionRequest);
-    return ResponseEntity.ok(ApiStandardResponse.success(meshyAPIResponse));
+   return ResponseEntity.ok(ApiStandardResponse.success(meshyAPIResponse));
   }
 
 

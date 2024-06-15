@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
 
 
-  List<Payment> findAllByUser(Optional<User> user);
+  List<Payment> findAllByUserOrderByDateDesc(Optional<User> user);
 
   List<Payment> findAllByTid(String tid);
 

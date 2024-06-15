@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.ErrorResponse;
@@ -38,8 +37,6 @@ import org.springframework.web.servlet.ModelAndView;
 public class KakaoPayController {
 
   private final KakaoPayService kakaoPayService;
-  @Value("${spring.security.oauth2.client.kakaoPay.client-id}")
-  private String cid;
 
   @Operation(summary = "결제 요청", description = "결제 창을 제공되며 결제를 진행합니다.")
   @ApiResponses({
